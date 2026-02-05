@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Loyalty CRM System - Araya Consulting</title>
+    <title>CRM Seblak Salah - Powered by Araya Consulting</title>
     <style>
         :root {
             --primary-bg: #f0f2f5;
             --card-bg: #ffffff;
-            --accent-color: #3498db;
+            --accent-color: #e67e22;
             --success-color: #27ae60;
             --wa-color: #25d366;
             --text-main: #2c3e50;
@@ -16,26 +16,21 @@
         }
         body { font-family: 'Segoe UI', Roboto, sans-serif; background: var(--primary-bg); color: var(--text-main); margin: 0; padding: 20px; }
         .container { max-width: 450px; margin: auto; }
-        
-        .brand-section { text-align: center; margin-bottom: 25px; }
-        .brand-section img { max-width: 140px; height: auto; margin-bottom: 10px; }
-        .brand-section h1 { font-size: 1rem; text-transform: uppercase; letter-spacing: 2px; margin: 0; }
-
+        .brand-section { text-align: center; margin-bottom: 20px; }
+        .brand-section img { max-width: 120px; height: auto; margin-bottom: 10px; border-radius: 50%; }
+        .brand-section h1 { font-size: 1.4rem; color: var(--accent-color); margin: 0; }
         .card { background: var(--card-bg); padding: 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); }
-        
         .section-header { font-size: 0.75rem; font-weight: bold; color: var(--text-muted); text-transform: uppercase; margin: 20px 0 10px 0; display: flex; align-items: center; }
         .section-header::after { content: ""; flex: 1; height: 1px; background: #eee; margin-left: 10px; }
-
         label { font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 5px; }
         input, select { width: 100%; padding: 12px; margin-bottom: 15px; border: 1.5px solid #eee; border-radius: 12px; box-sizing: border-box; font-size: 1rem; }
-
         .btn { width: 100%; padding: 14px; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 1rem; transition: 0.2s; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 8px; }
         .btn-check { background: transparent; border: 2px solid var(--accent-color); color: var(--accent-color); }
         .btn-save { background: var(--success-color); color: white; }
         .btn-wa { background: var(--wa-color); color: white; }
         .btn-redeem { background: var(--text-main); color: white; }
-        
-        .result-box { margin-top: 15px; padding: 15px; border-radius: 12px; display: none; font-size: 0.9rem; line-height: 1.5; }
+        .result-box { margin-top: 15px; padding: 15px; border-radius: 12px; display: none; font-size: 0.9rem; line-height: 1.5; border-left: 5px solid; }
+        .sync-status { font-size: 0.7rem; text-align: center; color: var(--text-muted); margin-top: 5px; }
         .footer { text-align: center; margin-top: 30px; font-size: 0.7rem; color: var(--text-muted); padding-top: 15px; border-top: 1px solid #ddd; }
     </style>
 </head>
@@ -43,63 +38,86 @@
 
 <div class="container">
     <div class="brand-section">
-        <img src="logo.png" alt="Araya Consulting">
-        <h1>Loyalty CRM System</h1>
+        <img src="logo.png" alt="Seblak Salah">
+        <h1>Seblak Salah</h1>
+        <p style="font-size: 0.8rem; color: #666;">Loyalty Program Management</p>
     </div>
 
     <div class="card">
-        <div class="section-header" style="margin-top:0;">Cek & Bagikan Poin</div>
-        <input type="tel" id="phone" placeholder="Nomor WhatsApp Pelanggan">
+        <div class="section-header" style="margin-top:0;">Cek & Follow Up</div>
+        <input type="tel" id="phone" placeholder="Nomor WA (0812...)">
         <div style="display: flex; gap: 10px;">
             <button class="btn btn-check" onclick="cekPoin()">Cek Poin</button>
-            <button class="btn btn-wa" onclick="bagikanWA()">Bagikan WA</button>
+            <button class="btn btn-wa" onclick="bagikanWA()">Kirim Pesan WA</button>
         </div>
 
-        <div class="section-header">Input Transaksi</div>
-        <input type="text" id="name" placeholder="Nama Pelanggan Baru">
-        <input type="number" id="amount" placeholder="Nominal Belanja (Rp)">
-        <button class="btn btn-save" onclick="tambahPoin()">Simpan & Tambah Poin</button>
+        <div class="section-header">Transaksi Baru</div>
+        <input type="text" id="name" placeholder="Nama Pelanggan">
+        <input type="number" id="amount" placeholder="Total Belanja (Rp)">
+        <button class="btn btn-save" onclick="tambahPoin()">Simpan & Update Cloud</button>
 
-        <div class="section-header">Katalog Hadiah</div>
+        <div class="section-header">Tukar Hadiah</div>
         <select id="reward">
             <option value="10">Es Teh Manis (10 Pts)</option>
             <option value="20">Dimsum (20 Pts)</option>
             <option value="25">Seblak Lengkap (25 Pts)</option>
         </select>
-        <button class="btn btn-redeem" onclick="redeemPoin()">Tukarkan Poin</button>
+        <button class="btn btn-redeem" onclick="redeemPoin()">Redeem Sekarang</button>
 
         <div id="output" class="result-box"></div>
+        <div id="syncStatus" class="sync-status"></div>
     </div>
 
     <div class="footer">
-        Powered by <strong>Araya Consulting</strong><br>
-        Sistem Manajemen Loyalitas Digital &copy; 2026
+        Developed by <strong>Araya Consulting</strong><br>
+        Digital Solutions for Seblak Salah &copy; 2026
     </div>
 </div>
 
 <script>
-    const STORAGE_KEY = 'arayacrm_data';
+    // URL Spreadsheet Anda sudah terpasang
+    const SPREADSHEET_URL = "https://script.google.com/macros/s/AKfycbwVO6-KVDvfFMcx6gMYF8u-C6JpSildSVPEDZ2N84IuWsvij_YRVtZhF-uz4SOYnx-i/exec"; 
+    const STORAGE_KEY = 'seblaksalah_crm';
     
     function getDb() { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
     function saveDb(data) { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
+
+    function syncToSheet(phone, name, points) {
+        document.getElementById('syncStatus').innerText = "🔄 Mengirim data ke Spreadsheet...";
+        fetch(SPREADSHEET_URL, {
+            method: 'POST', mode: 'no-cors',
+            body: JSON.stringify({ phone: phone, name: name, points: points })
+        }).then(() => {
+            document.getElementById('syncStatus').innerText = "✅ Data Aman di Cloud";
+            setTimeout(() => { document.getElementById('syncStatus').innerText = ""; }, 3000);
+        });
+    }
 
     function showOutput(msg, type) {
         const out = document.getElementById('output');
         out.style.display = 'block';
         out.style.background = type === 'success' ? '#e8f5e9' : (type === 'info' ? '#e3f2fd' : '#ffebee');
         out.style.color = type === 'success' ? '#2e7d32' : (type === 'info' ? '#1565c0' : '#c62828');
+        out.style.borderColor = type === 'success' ? '#27ae60' : (type === 'info' ? '#3498db' : '#e74c3c');
         out.innerHTML = msg;
     }
 
     function cekPoin() {
         const phone = document.getElementById('phone').value;
         const db = getDb();
-        if (!phone) return alert("Isi nomor WhatsApp!");
-        if (db[phone]) {
-            showOutput(`<strong>Status: Member Aktif</strong><br>Nama: ${db[phone].name}<br>Saldo: <strong>${db[phone].points} Poin</strong>`, 'info');
-        } else {
-            showOutput("Nomor belum terdaftar.", 'error');
+        if (!phone || !db[phone]) {
+            showOutput("Nomor tidak ditemukan di database.", 'error');
+            return;
         }
+        
+        const lastVisitDate = db[phone].lastVisit ? new Date(db[phone].lastVisit.split('/').reverse().join('-')) : new Date();
+        const today = new Date();
+        const diffTime = Math.abs(today - lastVisitDate);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+        let statusVisit = diffDays >= 7 ? `<br><span style="color:red;">⚠️ Sudah ${diffDays} hari tidak berkunjung!</span>` : "";
+        
+        showOutput(`<strong>Member: ${db[phone].name}</strong><br>Poin: ${db[phone].points} Pts<br>Kunjungan Terakhir: ${db[phone].lastVisit}${statusVisit}`, 'info');
     }
 
     function tambahPoin() {
@@ -110,34 +128,41 @@
 
         const poinBaru = Math.floor(amount / 10000);
         let db = getDb();
+        const now = new Date();
+        const dateStr = now.toLocaleDateString('id-ID');
+
         if (db[phone]) {
             db[phone].points += poinBaru;
+            db[phone].lastVisit = dateStr;
+            if(nameInput) db[phone].name = nameInput;
         } else {
-            db[phone] = { name: nameInput || "Pelanggan", points: poinBaru };
+            db[phone] = { name: nameInput || "Pelanggan", points: poinBaru, lastVisit: dateStr };
         }
         saveDb(db);
-        showOutput(`<strong>Poin Berhasil Ditambah!</strong><br>Total Saldo: <strong>${db[phone].points} Pts</strong>`, 'success');
+        syncToSheet(phone, db[phone].name, db[phone].points);
+        showOutput(`<strong>Poin Berhasil Ditambah!</strong><br>Total Saldo: ${db[phone].points} Pts`, 'success');
         document.getElementById('amount').value = "";
     }
 
     function bagikanWA() {
         const phone = document.getElementById('phone').value;
         const db = getDb();
-        if (!phone || !db[phone]) return alert("Data pelanggan tidak ditemukan!");
+        if (!phone || !db[phone]) return alert("Data tidak ditemukan!");
 
         const nama = db[phone].name;
         const poin = db[phone].points;
-        let pesan = `Halo kak ${nama}! 👋\n\nSaat ini kakak memiliki *${poin} Poin Loyalitas* di outlet kami.`;
+        const lastVisitDate = db[phone].lastVisit ? new Date(db[phone].lastVisit.split('/').reverse().join('-')) : new Date();
+        const diffDays = Math.ceil(Math.abs(new Date() - lastVisitDate) / (1000 * 60 * 60 * 24));
 
-        // Logika Ajakan berdasarkan jumlah poin
-        if (poin >= 25) {
-            pesan += `\n\nWah! Poin kakak sudah cukup untuk ditukarkan dengan *1 Porsi Seblak Lengkap* lho! 😍\nYuk, mampir ke outlet sekarang buat tukerin poinnya!`;
-        } else if (poin >= 20) {
-            pesan += `\n\nKeren! Kakak sudah bisa menukarkan poin dengan *Dimsum* pilihan. 🥟\nDitunggu kehadirannya di outlet ya kak!`;
-        } else if (poin >= 10) {
-            pesan += `\n\nAsik! Poin kakak sudah bisa ditukar dengan *Es Teh Manis* segar. 🍹\nYuk tambah terus transaksinya biar bisa tukar hadiah yang lebih besar!`;
+        let pesan = "";
+
+        if (diffDays >= 7) {
+            pesan = `Selamat Siang Kak ${nama}, rindu nih dari *Seblak Salah*! ✨\n\nSudah ${diffDays} hari kakak tidak mampir. Kakak masih punya saldo *${poin} Poin* lho. Yuk, mampir hari ini dan nikmati menu favorit kakak lagi!`;
+        } 
+        else if (poin >= 25) {
+            pesan = `Halo Kak ${nama}! 👋\n\nApresiasi untuk pelanggan setia *Seblak Salah*. Saat ini kakak punya *${poin} Poin*. Kabar gembira! Poin kakak sudah bisa ditukar dengan *1 Porsi Seblak Lengkap* gratis! 😍\n\nYuk, mampir ke outlet hari ini!`;
         } else {
-            pesan += `\n\nYuk kak, tingkatkan terus transaksinya di outlet kami! Kumpulkan minimal *10 Poin* untuk mulai mendapatkan hadiah menarik. Ditunggu ya! 😊`;
+            pesan = `Halo Kak ${nama}, terima kasih telah menjadi pelanggan setia *Seblak Salah*. Saldo poin kakak saat ini: *${poin} Poin*.\n\nSetiap transaksi Rp10.000 dapat 1 Poin. Kumpulkan terus poinnya untuk ditukarkan dengan menu favorit secara gratis!`;
         }
 
         const urlWA = `https://wa.me/${phone.replace(/^0/, '62')}?text=${encodeURIComponent(pesan)}`;
@@ -146,15 +171,14 @@
 
     function redeemPoin() {
         const phone = document.getElementById('phone').value;
-        const select = document.getElementById('reward');
-        const cost = parseInt(select.value);
+        const cost = parseInt(document.getElementById('reward').value);
         let db = getDb();
-        if (!db[phone]) return alert("Data tidak ditemukan!");
-        if (db[phone].points < cost) return alert("Poin tidak cukup!");
+        if (!db[phone] || db[phone].points < cost) return alert("Poin tidak cukup!");
 
         db[phone].points -= cost;
         saveDb(db);
-        showOutput(`<strong>Redeem Sukses!</strong><br>Sisa Poin: <strong>${db[phone].points} Pts</strong>`, 'success');
+        syncToSheet(phone, db[phone].name, db[phone].points);
+        showOutput(`<strong>Redeem Sukses!</strong><br>Sisa Poin: ${db[phone].points} Pts`, 'success');
     }
 </script>
 
