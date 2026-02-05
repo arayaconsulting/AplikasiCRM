@@ -127,8 +127,23 @@
 
     function sapaPelanggan() {
         if (!lastActiveUser) return;
+        
+        const pts = lastActiveUser.points;
+        let infoKhusus = "";
+        
+        // Logika Deteksi Hadiah Berdasarkan Poin
+        if (pts >= 25) {
+            infoKhusus = `\n🔥 *Kabar Gembira!* Poin Kakak sudah mencapai *${pts}*. Kakak berhak menukarkan poin ini dengan *1 PORSI SEBLAK LENGKAP* gratis pada kunjungan berikutnya! 😍\n`;
+        } else if (pts >= 20) {
+            infoKhusus = `\n🔥 *Kabar Gembira!* Poin Kakak sudah mencapai *${pts}*. Kakak berhak menukarkan poin ini dengan *DIMSUM* gratis! 🥟\n`;
+        } else if (pts >= 10) {
+            infoKhusus = `\n🔥 *Kabar Gembira!* Poin Kakak sudah mencapai *${pts}*. Kakak berhak menukarkan poin ini dengan *ES TEH MANIS* gratis! 🍹\n`;
+        }
+
         const katalog = `*Katalog Penukaran Poin:* \n🍹 10 Poin: Es Teh Manis \n🥟 20 Poin: Dimsum \n🍲 25 Poin: Seblak Lengkap`;
-        const pesan = `Halo Kak ${lastActiveUser.name}! 👋\n\nTerima kasih sudah mampir ke *Seblak Salah* hari ini. 😊\n\nTransaksi Kakak barusan sudah tercatat. Saldo poin Kakak sekarang: *${lastActiveUser.points} Poin*.\n\n${katalog}\n\nDitunggu kedatangannya lagi ya kak!`;
+        
+        const pesan = `Halo Kak ${lastActiveUser.name}! 👋\n\nTerima kasih sudah mampir ke *Seblak Salah* hari ini. 😊\n\nTransaksi Kakak barusan sudah tercatat. Saldo poin Kakak sekarang: *${pts} Poin*.${infoKhusus}\n${katalog}\n\nDitunggu kedatangannya lagi ya kak!`;
+        
         window.open(`https://wa.me/${lastActiveUser.phone.replace(/^0/, '62')}?text=${encodeURIComponent(pesan)}`, '_blank');
         document.getElementById('btnSapa').style.display = 'none';
     }
