@@ -80,8 +80,8 @@
 </div>
 
 <script>
-    // URL Web App Anda yang baru sudah terpasang di sini
-    const SPREADSHEET_URL = "https://script.google.com/macros/s/AKfycbyXuwUxl1GSOAbPVsHoIrBb2gRIongXhVOO7hbUt7sQa9XElxX65LP5nC8N5rVI585u/exec"; 
+    // URL Web App Anda sudah terpasang
+    const SPREADSHEET_URL = "https://script.google.com/macros/s/AKfycby7sNuxo4shkvjdK5OLp9oNC96iVumjPnWixS91_WPLQtkDuS_lGv8Ht3XuB-IjYwjW/exec"; 
     const STORAGE_KEY = 'seblaksalah_crm_v3';
     let lastActiveUser = null;
 
@@ -92,7 +92,7 @@
         const phone = document.getElementById('phone').value;
         if (!phone) return;
         const statusEl = document.getElementById('statusCloud');
-        statusEl.innerHTML = "Mengecek data di cloud...";
+        statusEl.innerHTML = "Mengecek cloud...";
 
         try {
             const response = await fetch(`${SPREADSHEET_URL}?phone=${phone}`);
@@ -100,78 +100,69 @@
 
             if (data && !data.error) {
                 document.getElementById('name').value = data.name || "";
-                if (data.dob) {
-                    const dateObj = new Date(data.dob);
-                    if (!isNaN(dateObj)) document.getElementById('dob').value = dateObj.toISOString().split('T')[0];
-                }
+                if (data.dob) document.getElementById('dob').value = new Date(data.dob).toISOString().split('T')[0];
                 
                 let db = getDb();
                 db[phone] = { 
-                    name: data.name, 
-                    points: data.points, 
-                    lastVisit: data.lastVisit || new Date().toISOString(), 
-                    dob: data.dob || "" 
+                    name: data.name, points: data.points, lastVisit: data.lastVisit, 
+                    dob: data.dob, sisaUang: data.sisaUang || 0 
                 };
                 saveDb(db);
-                statusEl.innerHTML = `✅ Terhubung! Saldo: ${data.points} Pts`;
+                statusEl.innerHTML = `✅ Saldo: ${data.points} Pts | Sisa: Rp${data.sisaUang}`;
                 statusEl.style.color = "#27ae60";
             } else {
                 statusEl.innerHTML = "ℹ️ Pelanggan Baru";
                 statusEl.style.color = "#e67e22";
             }
-        } catch (e) {
-            statusEl.innerHTML = "⚠️ Cloud tidak merespon.";
-            statusEl.style.color = "#e74c3c";
-        }
-    }
-
-    function syncToSheet(phone, name, points, dob) {
-        fetch(SPREADSHEET_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ phone, name, points, dob }) });
+        } catch (e) { statusEl.innerHTML = "⚠️ Cloud error."; }
     }
 
     function tambahPoin() {
         const phone = document.getElementById('phone').value;
         const nameInput = document.getElementById('name').value;
-        const dob = document.getElementById('dob').value;
-        const amount = parseInt(document.getElementById('amount').value);
-        if (!phone || isNaN(amount) || amount < 10000) return alert("Isi nomor WA dan Nominal (min 10rb)!");
+        const dobInput = document.getElementById('dob').value;
+        const amount = parseInt(document.getElementById('amount').value || 0);
+        
+        if (!phone) return alert("Nomor WA wajib diisi!");
 
         let db = getDb();
         const now = new Date().toISOString();
-        const poinBaru = Math.floor(amount / 10000);
+        let currentSisa = db[phone] ? (parseInt(db[phone].sisaUang) || 0) : 0;
+        
+        let totalUang = currentSisa + amount;
+        let poinBaru = Math.floor(totalUang / 10000);
+        let sisaBaru = totalUang % 10000;
 
         if (db[phone]) {
             db[phone].points += poinBaru;
+            db[phone].sisaUang = sisaBaru;
             db[phone].lastVisit = now;
             if(nameInput) db[phone].name = nameInput;
-            if(dob) db[phone].dob = dob;
+            if(dobInput) db[phone].dob = dobInput;
         } else {
-            db[phone] = { name: nameInput || "Pelanggan", points: poinBaru, lastVisit: now, dob: dob || "" };
+            db[phone] = { name: nameInput || "Pelanggan", points: poinBaru, lastVisit: now, dob: dobInput || "", sisaUang: sisaBaru };
         }
         
         saveDb(db);
-        syncToSheet(phone, db[phone].name, db[phone].points, db[phone].dob);
-        lastActiveUser = { phone, ...db[phone] };
+        fetch(SPREADSHEET_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ phone, name: db[phone].name, points: db[phone].points, dob: db[phone].dob, amount }) });
         
-        const out = document.getElementById('output');
-        out.style.display = 'block';
-        out.style.background = '#f0fdf4';
-        out.style.color = '#166534';
-        out.innerHTML = `✅ <strong>Berhasil!</strong><br>Saldo ${db[phone].name}: ${db[phone].points} Pts`;
+        lastActiveUser = { phone, ...db[phone] };
+        document.getElementById('output').style.display = 'block';
+        document.getElementById('output').style.background = '#f0fdf4';
+        document.getElementById('output').innerHTML = `✅ <strong>Berhasil!</strong><br>Poin: ${db[phone].points} | Tabungan Sisa: Rp${db[phone].sisaUang}`;
         document.getElementById('btnSapa').style.display = 'flex';
         document.getElementById('amount').value = "";
+        document.getElementById('statusCloud').innerHTML = `✅ Saldo: ${db[phone].points} Pts | Sisa: Rp${db[phone].sisaUang}`;
     }
 
     function sapaPelanggan() {
         if (!lastActiveUser) return;
         const pts = lastActiveUser.points;
-        let infoKhusus = "";
-        if (pts >= 25) infoKhusus = `\n🔥 *Kabar Gembira!* Poin Kakak sudah mencapai *${pts}*. Kakak berhak menukarkan poin ini dengan *1 PORSI SEBLAK LENGKAP* gratis! 😍\n`;
-        else if (pts >= 20) infoKhusus = `\n🔥 *Kabar Gembira!* Poin Kakak sudah mencapai *${pts}*. Kakak berhak menukarkan poin ini dengan *DIMSUM* gratis! 🥟\n`;
-        else if (pts >= 10) infoKhusus = `\n🔥 *Kabar Gembira!* Poin Kakak sudah mencapai *${pts}*. Kakak berhak menukarkan poin ini dengan *ES TEH MANIS* gratis! 🍹\n`;
-
-        const katalog = `*Katalog Penukaran Poin:* \n🍹 10 Poin: Es Teh Manis \n🥟 20 Poin: Dimsum \n🍲 25 Poin: Seblak Lengkap`;
-        const pesan = `Halo Kak ${lastActiveUser.name}! 👋\n\nTerima kasih sudah mampir ke *Seblak Salah* hari ini. 😊\n\nTransaksi Kakak barusan sudah tercatat. Saldo poin Kakak sekarang: *${pts} Poin*.${infoKhusus}\n${katalog}\n\nDitunggu kedatangannya lagi ya kak!`;
+        const sisa = lastActiveUser.sisaUang;
+        let infoPoin = pts >= 10 ? `\n🔥 *Hore!* Poin Kakak sudah bisa ditukar dengan menu favorit gratis!\n` : `\n(Kumpulkan terus sisa uangnya agar jadi poin berikutnya!)\n`;
+        
+        const katalog = `*Katalog Penukaran Poin:* \n🍹 10 Pts: Es Teh \n🥟 20 Pts: Dimsum \n🍲 25 Pts: Seblak Lengkap`;
+        const pesan = `Halo Kak ${lastActiveUser.name}! 👋\n\nTerima kasih sudah mampir ke *Seblak Salah*. 😊\n\nSaldo Poin: *${pts} Poin*\nTabungan Sisa: *Rp${sisa}*${infoPoin}\n${katalog}\n\nDitunggu kedatangannya lagi ya kak!`;
         window.open(`https://wa.me/${lastActiveUser.phone.replace(/^0/, '62')}?text=${encodeURIComponent(pesan)}`, '_blank');
         document.getElementById('btnSapa').style.display = 'none';
     }
@@ -183,44 +174,34 @@
         listUltah.innerHTML = ""; listFollowUp.innerHTML = "";
         const today = new Date();
         const tomorrow = new Date(); tomorrow.setDate(today.getDate() + 1);
-        let countUltah = 0, countFollow = 0;
 
         for (let phone in db) {
             if (db[phone].dob) {
                 const bday = new Date(db[phone].dob);
-                const isToday = bday.getDate() === today.getDate() && bday.getMonth() === today.getMonth();
-                const isTomorrow = bday.getDate() === tomorrow.getDate() && bday.getMonth() === tomorrow.getMonth();
-                if (isToday || isTomorrow) {
-                    countUltah++;
+                if ((bday.getDate() === today.getDate() && bday.getMonth() === today.getMonth()) || (bday.getDate() === tomorrow.getDate() && bday.getMonth() === tomorrow.getMonth())) {
                     const row = document.createElement('div');
                     row.className = 'item-row birthday-row';
-                    row.innerHTML = `<div class="info-text"><strong>${db[phone].name}</strong>Ultah: ${isToday ? "HARI INI! 🎂" : "Besok 🎁"}</div>
-                        <button class="btn-mini-wa" onclick="kirimUltah('${phone}', '${db[phone].name}')">Traktir</button>`;
+                    row.innerHTML = `<div class="info-text"><strong>${db[phone].name}</strong>Ultah: ${bday.getDate() === today.getDate() ? "HARI INI!" : "Besok"}</div><button class="btn-mini-wa" onclick="kirimUltah('${phone}', '${db[phone].name}')">Traktir</button>`;
                     listUltah.appendChild(row);
                 }
             }
             const diffDays = Math.ceil(Math.abs(today - new Date(db[phone].lastVisit)) / (1000 * 60 * 60 * 24));
             if (diffDays >= 7) {
-                countFollow++;
                 const row = document.createElement('div');
                 row.className = 'item-row follow-up';
-                row.innerHTML = `<div class="info-text"><strong>${db[phone].name}</strong>${diffDays} hari tidak mampir</div>
-                    <button class="btn-mini-wa" onclick="kirimRindu('${phone}', '${db[phone].name}', ${db[phone].points}, ${diffDays})">Sapa</button>`;
+                row.innerHTML = `<div class="info-text"><strong>${db[phone].name}</strong>${diffDays} hari tidak mampir</div><button class="btn-mini-wa" onclick="kirimRindu('${phone}', '${db[phone].name}', ${db[phone].points}, ${diffDays})">Sapa</button>`;
                 listFollowUp.appendChild(row);
             }
         }
-        if (countUltah === 0) listUltah.innerHTML = '<p style="text-align: center; font-size: 0.8rem; color: #999;">Tidak ada yang ultah terdekat.</p>';
-        if (countFollow === 0) listFollowUp.innerHTML = '<p style="text-align: center; font-size: 0.8rem; color: #999;">Semua pelanggan aktif mampir! 😊</p>';
     }
 
     function kirimUltah(phone, nama) {
-        const pesan = `Halo Kak ${nama}! 👋\n\nKami dari *Seblak Salah* ingin mengucapkan *Selamat Ulang Tahun*! 🎂✨\n\nSemoga panjang umur & sehat selalu. Sebagai kado spesial, Seblak Salah mau *MENTRAKTIR* Kakak 1 Porsi SEBLAK LENGKAP gratis! 😍\n\nTunjukkan WA ini & identitas ke kasir ya. Makan di tempat. Ditunggu! 🍲✨`;
+        const pesan = `Halo Kak ${nama}! 👋\n\nSelamat Ulang Tahun! 🎂 Sebagai kado spesial, *Seblak Salah* mau *MENTRAKTIR* Kakak 1 Porsi SEBLAK LENGKAP gratis! 😍 Tunjukkan WA ini ke kasir ya. Khusus makan di tempat.`;
         window.open(`https://wa.me/${phone.replace(/^0/, '62')}?text=${encodeURIComponent(pesan)}`, '_blank');
     }
 
     function kirimRindu(phone, nama, poin, hari) {
-        const katalog = `*Katalog Penukaran Poin:* \n🍹 10 Poin: Es Teh Manis \n🥟 20 Poin: Dimsum \n🍲 25 Poin: Seblak Lengkap`;
-        const pesan = `Selamat Siang Kak ${nama}, kangen nih dari *Seblak Salah*! ✨\n\nSudah ${hari} hari Kakak tidak mampir. Saldo Kakak masih ada *${poin} Poin*. \n\n${katalog} \n\nYuk mampir hari ini!`;
+        const pesan = `Selamat Siang Kak ${nama}, kangen nih dari *Seblak Salah*! ✨ Sudah ${hari} hari Kakak tidak mampir. Saldo Poin: *${poin}*. Yuk mampir!`;
         window.open(`https://wa.me/${phone.replace(/^0/, '62')}?text=${encodeURIComponent(pesan)}`, '_blank');
     }
 
@@ -232,7 +213,8 @@
         db[phone].points -= cost;
         db[phone].lastVisit = new Date().toISOString();
         saveDb(db);
-        syncToSheet(phone, db[phone].name, db[phone].points, db[phone].dob);
+        fetch(SPREADSHEET_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ phone, name: db[phone].name, points: db[phone].points, dob: db[phone].dob, amount: 0 }) });
+        
         const out = document.getElementById('output');
         out.style.display = 'block'; out.style.background = '#fef2f2'; out.style.color = '#991b1b';
         out.innerHTML = `🎁 <strong>Redeem Berhasil!</strong><br>Sisa Saldo ${db[phone].name}: ${db[phone].points} Pts`;
