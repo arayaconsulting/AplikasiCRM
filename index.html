@@ -78,8 +78,8 @@
 </div>
 
 <script>
-    // URL Deployment terbaru Anda sudah terpasang di bawah ini
-    const SPREADSHEET_URL = "https://script.google.com/macros/s/AKfycbyRKc9Kid9ZnSPjumMZlK0GaZht_RM5S6XMm3kVH-xG_DKodl_5CcLZ__fNRp6BHxjO/exec"; 
+    // URL Deployment terbaru Bapak
+    const SPREADSHEET_URL = "https://script.google.com/macros/s/AKfycbyjM7tRwe4vuzKmgoBPeuu1Ji-b4F2aeE0_iHMs39SQbsnBqZs-Ga-4hDFXlEi9_PAL/exec"; 
     const STORAGE_KEY = 'seblaksalah_crm_v3';
     let lastActiveUser = null;
 
@@ -99,10 +99,12 @@
             if (data && !data.error) {
                 document.getElementById('name').value = data.name || "";
                 
-                // Memastikan data Tanggal Lahir (Kolom E) masuk ke kotak input dengan benar
+                // KUNCI: Memastikan dob diambil dari urutan yang benar (Data Tanggal Lahir)
                 if (data.dob) {
                     const dateObj = new Date(data.dob);
                     if (!isNaN(dateObj)) {
+                        // Jika tahunnya 2026, kemungkinan itu data update yang salah masuk kolom.
+                        // Kita tampilkan saja, tapi setelah transaksi baru ini akan benar permanen.
                         document.getElementById('dob').value = dateObj.toISOString().split('T')[0];
                     }
                 }
@@ -118,6 +120,8 @@
             } else {
                 statusEl.innerHTML = "ℹ️ Pelanggan Baru";
                 statusEl.style.color = "#e67e22";
+                document.getElementById('name').value = "";
+                document.getElementById('dob').value = "";
             }
         } catch (e) { statusEl.innerHTML = "⚠️ Cloud error."; }
     }
@@ -150,16 +154,16 @@
         
         saveDb(db);
         
-        // Mengirim data ke Spreadsheet sesuai urutan kolom yang benar
+        // Mengirim ke Cloud. Pastikan urutan variabel di sini sinkron dengan Apps Script
         fetch(SPREADSHEET_URL, { 
             method: 'POST', 
             mode: 'no-cors', 
             body: JSON.stringify({ 
-                phone, 
+                phone: phone, 
                 name: db[phone].name, 
                 points: db[phone].points, 
-                dob: db[phone].dob, 
-                amount 
+                dob: db[phone].dob, // Tanggal Lahir
+                amount: amount 
             }) 
         });
         
@@ -180,8 +184,7 @@
         const sisa = lastActiveUser.sisaUang;
         let infoPoin = pts >= 10 ? `\n🔥 *Hore!* Poin Kakak sudah bisa ditukar hadiah gratis!\n` : "";
         
-        const katalog = `*Katalog Penukaran Poin:* \n🍹 10 Pts: Es Teh \n🥟 20 Pts: Dimsum \n🍲 25 Pts: Seblak Lengkap`;
-        const pesan = `Halo Kak ${lastActiveUser.name}! 👋\n\nTerima kasih sudah jajan di *Seblak Salah*. 😊\n\nSaldo Poin: *${pts} Poin*\nTabungan Sisa: *Rp${sisa}*${infoPoin}\n${katalog}\n\nDitunggu kedatangannya lagi ya kak!`;
+        const pesan = `Halo Kak ${lastActiveUser.name}! 👋\n\nTerima kasih sudah jajan di *Seblak Salah*. 😊\n\nSaldo Poin: *${pts} Poin*\nTabungan Sisa: *Rp${sisa}*${infoPoin}\n\nDitunggu kedatangannya lagi ya kak!`;
         window.open(`https://wa.me/${lastActiveUser.phone.replace(/^0/, '62')}?text=${encodeURIComponent(pesan)}`, '_blank');
         document.getElementById('btnSapa').style.display = 'none';
     }
@@ -195,15 +198,19 @@
         const tomorrow = new Date(); tomorrow.setDate(today.getDate() + 1);
 
         for (let phone in db) {
+            // Dashboard Ultah
             if (db[phone].dob) {
                 const bday = new Date(db[phone].dob);
-                if ((bday.getDate() === today.getDate() && bday.getMonth() === today.getMonth()) || (bday.getDate() === tomorrow.getDate() && bday.getMonth() === tomorrow.getMonth())) {
-                    const row = document.createElement('div');
-                    row.className = 'item-row birthday-row';
-                    row.innerHTML = `<div class="info-text"><strong>${db[phone].name}</strong>Ultah: ${bday.getDate() === today.getDate() ? "HARI INI!" : "Besok"}</div><button class="btn-mini-wa" onclick="kirimUltah('${phone}', '${db[phone].name}')">Traktir</button>`;
-                    listUltah.appendChild(row);
+                if (!isNaN(bday) && bday.getFullYear() < 2026) { // Cek agar bukan data 'salah kolom'
+                    if ((bday.getDate() === today.getDate() && bday.getMonth() === today.getMonth()) || (bday.getDate() === tomorrow.getDate() && bday.getMonth() === tomorrow.getMonth())) {
+                        const row = document.createElement('div');
+                        row.className = 'item-row birthday-row';
+                        row.innerHTML = `<div class="info-text"><strong>${db[phone].name}</strong>Ultah: ${bday.getDate() === today.getDate() ? "HARI INI!" : "Besok"}</div><button class="btn-mini-wa" onclick="kirimUltah('${phone}', '${db[phone].name}')">Traktir</button>`;
+                        listUltah.appendChild(row);
+                    }
                 }
             }
+            // Dashboard Follow Up
             const diffDays = Math.ceil(Math.abs(today - new Date(db[phone].lastVisit)) / (1000 * 60 * 60 * 24));
             if (diffDays >= 7) {
                 const row = document.createElement('div');
@@ -234,12 +241,11 @@
         db[phone].lastVisit = new Date().toISOString();
         saveDb(db);
         
-        // Mengirim update saldo terbaru ke Spreadsheet dengan amount 0 agar tidak menambah poin belanja
         fetch(SPREADSHEET_URL, { 
             method: 'POST', 
             mode: 'no-cors', 
             body: JSON.stringify({ 
-                phone, 
+                phone: phone, 
                 name: db[phone].name, 
                 points: db[phone].points, 
                 dob: db[phone].dob, 
