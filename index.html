@@ -1,134 +1,50 @@
 <!DOCTYPE html>
-<html lang="id">
+<html>
 <head>
-    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CRM Seblak Salah - Powered by Araya Consulting</title>
+    <title>CRM Seblak Salah</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; background: #f9f9f9; color: #333; }
-        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); max-width: 400px; margin: auto; }
-        
-        /* Branding Header & Footer */
-        .brand-header { text-align: center; margin-bottom: 20px; }
-        .brand-footer { text-align: center; margin-top: 30px; padding-top: 15px; border-top: 1px solid #eee; }
-        .brand-footer img { width: 80px; filter: grayscale(100%); opacity: 0.6; transition: 0.3s; }
-        .brand-footer img:hover { filter: grayscale(0%); opacity: 1; }
-        .brand-footer p { font-size: 10px; color: #999; margin-top: 5px; text-transform: uppercase; letter-spacing: 1px; }
-
-        h2 { color: #e67e22; text-align: center; margin-bottom: 5px; margin-top: 0; }
-        .subtitle { text-align: center; font-size: 0.8em; color: #666; margin-bottom: 20px; }
-        
-        label { font-size: 0.85em; font-weight: bold; display: block; margin-top: 10px; color: #555; }
-        input, select { width: 100%; padding: 12px; margin: 5px 0 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 14px; }
-        
-        .btn-group { display: flex; gap: 10px; margin-bottom: 10px; }
-        button { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; }
-        
-        .btn-save { background: #27ae60; color: white; }
-        .btn-check { background: #3498db; color: white; }
-        .btn-redeem { background: #e67e22; color: white; margin-top: 10px; }
-        
-        button:active { transform: scale(0.96); }
-        
-        .result { margin-top: 20px; padding: 15px; border-radius: 8px; background: #fff3e0; border-left: 5px solid #e67e22; display: none; font-size: 14px; line-height: 1.5; }
-        hr { border: 0; border-top: 1px solid #eee; margin: 20px 0; }
+        body { font-family: sans-serif; background: #f4f4f4; padding: 20px; text-align: center; }
+        .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); max-width: 350px; margin: auto; }
+        input, button, select { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #ddd; box-sizing: border-box; }
+        button { background: #e67e22; color: white; border: none; font-weight: bold; cursor: pointer; }
+        .footer { margin-top: 20px; font-size: 12px; color: #888; }
     </style>
 </head>
 <body>
-
-<div class="card">
-    <div class="brand-header">
-        <h2>Seblak Salah</h2>
-        <p class="subtitle">Program Loyalitas Pelanggan</p>
+    <div class="card">
+        <h3>Seblak Salah</h3>
+        <input type="text" id="phone" placeholder="Nomor WA">
+        <button onclick="cek()">Cek Poin</button>
+        <hr>
+        <input type="number" id="amt" placeholder="Nominal Belanja">
+        <button style="background: #27ae60;" onclick="tambah()">Tambah Poin</button>
+        <div id="msg" style="margin-top:15px; font-weight:bold; color:#d35400;"></div>
+        
+        <div class="footer">
+            <p>Developed by</p>
+            <strong>ARAYA CONSULTING</strong>
+        </div>
     </div>
-    
-    <label>Nomor WhatsApp</label>
-    <input type="text" id="phone" placeholder="Contoh: 08123456789">
-    
-    <button class="btn-check" onclick="cekPoin()">Cek Saldo Poin</button>
 
-    <hr>
-
-    <label>Nama Pelanggan (Untuk Pendaftaran)</label>
-    <input type="text" id="name" placeholder="Nama Lengkap">
-    
-    <label>Total Belanja (Rp)</label>
-    <input type="number" id="amount" placeholder="Input nominal transaksi">
-    
-    <button class="btn-save" onclick="tambahPoin()">Simpan & Tambah Poin</button>
-
-    <hr>
-
-    <label>Tukar Hadiah</label>
-    <select id="reward">
-        <option value="10">Es Teh Manis (10 Pts)</option>
-        <option value="25">Kerupuk Kaleng (25 Pts)</option>
-        <option value="50">Seblak Komplit (50 Pts)</option>
-    </select>
-    <button class="btn-redeem" onclick="redeemPoin()">Tukarkan Poin</button>
-
-    <div id="output" class="result"></div>
-
-    <div class="brand-footer">
-        <p>Developed By</p>
-        <img src="https://via.placeholder.com/150x50?text=ARAYA+CONSULTING" alt="Araya Consulting Logo">
-        <p>© 2026 Araya Consulting</p>
-    </div>
-</div>
-
-<script>
-    // Logika JS tetap sama seperti sebelumnya
-    function getDb() { return JSON.parse(localStorage.getItem('crm_seblak')) || {}; }
-    function saveDb(data) { localStorage.setItem('crm_seblak', JSON.stringify(data)); }
-
-    function showOutput(msg, color = "#fff3e0", border = "#e67e22") {
-        const out = document.getElementById('output');
-        out.style.display = 'block';
-        out.style.background = color;
-        out.style.borderLeftColor = border;
-        out.innerHTML = msg;
-    }
-
-    function cekPoin() {
-        const phone = document.getElementById('phone').value;
-        let db = getDb();
-        if (!phone) { alert("Masukkan nomor WhatsApp!"); return; }
-        if (db[phone]) {
-            showOutput(`<strong>Info Pelanggan</strong><br>Nama: ${db[phone].name}<br>Total Poin: <span style="font-size:1.2em; color:#3498db;"><strong>${db[phone].points} Pts</strong></span>`, "#e3f2fd", "#3498db");
-        } else {
-            showOutput("Nomor tidak ditemukan. Silakan belanja untuk daftar.", "#ffebee", "#f44336");
+    <script>
+        function db() { return JSON.parse(localStorage.getItem('crm_seblak')) || {}; }
+        function cek() {
+            let p = document.getElementById('phone').value;
+            let data = db();
+            document.getElementById('msg').innerHTML = data[p] ? "Poin: " + data[p].pts : "Belum terdaftar";
         }
-    }
-
-    function tambahPoin() {
-        const phone = document.getElementById('phone').value;
-        let name = document.getElementById('name').value;
-        const amount = parseInt(document.getElementById('amount').value);
-        if (!phone || isNaN(amount) || amount < 10000) { alert("Data belum lengkap!"); return; }
-        const poinBaru = Math.floor(amount / 10000);
-        let db = getDb();
-        if (db[phone]) {
-            db[phone].points += poinBaru;
-        } else {
-            db[phone] = { name: name || "Pelanggan", points: poinBaru, history: [] };
+        function tambah() {
+            let p = document.getElementById('phone').value;
+            let a = parseInt(document.getElementById('amt').value);
+            if(!p || !a) return alert("Isi data!");
+            let data = db();
+            let pts = Math.floor(a/10000);
+            if(data[p]) data[p].pts += pts;
+            else data[p] = {pts: pts};
+            localStorage.setItem('crm_seblak', JSON.stringify(data));
+            document.getElementById('msg').innerHTML = "Berhasil! Total Poin: " + data[p].pts;
         }
-        saveDb(db);
-        showOutput(`<strong>Berhasil!</strong><br>Poin Baru: +${poinBaru}<br>Total: <strong>${db[phone].points} Pts</strong>`, "#e8f5e9", "#27ae60");
-        document.getElementById('amount').value = "";
-    }
-
-    function redeemPoin() {
-        const phone = document.getElementById('phone').value;
-        const rewardSelect = document.getElementById('reward');
-        const cost = parseInt(rewardSelect.value);
-        let db = getDb();
-        if (!phone || !db[phone]) { alert("Nomor belum terdaftar!"); return; }
-        if (db[phone].points < cost) { alert("Poin tidak cukup!"); return; }
-        db[phone].points -= cost;
-        saveDb(db);
-        showOutput(`<strong>Tukar Sukses!</strong><br>Sisa Poin: <strong>${db[phone].points}</strong>`, "#fff3e0", "#e67e22");
-    }
-</script>
-
+    </script>
 </body>
 </html>
