@@ -6,13 +6,7 @@
     <title>CRM Seblak Salah - Powered by Araya Consulting</title>
     <style>
         :root {
-            --primary: #e67e22;
-            --secondary: #2c3e50;
-            --success: #27ae60;
-            --wa: #25d366;
-            --birthday: #3498db;
-            --bg: #f4f7f6;
-            --card: #ffffff;
+            --primary: #e67e22; --secondary: #2c3e50; --success: #27ae60; --wa: #25d366; --birthday: #3498db; --bg: #f4f7f6; --card: #ffffff;
         }
         body { font-family: 'Segoe UI', Roboto, sans-serif; background: var(--bg); margin: 0; padding: 15px; color: #333; }
         .container { max-width: 500px; margin: auto; }
@@ -23,7 +17,7 @@
         .card { background: var(--card); padding: 20px; border-radius: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); border: 1px solid #edf2f7; margin-bottom: 15px; }
         .section-header { font-size: 0.7rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin: 20px 0 10px 0; display: flex; align-items: center; letter-spacing: 0.5px; }
         .section-header::after { content: ""; flex: 1; height: 1px; background: #e2e8f0; margin-left: 10px; }
-        label { font-size: 0.8rem; font-weight: 600; display: block; margin-bottom: 4px; color: #475569; }
+        label { font-size: 0.7rem; font-weight: 600; display: block; margin-bottom: 4px; color: #475569; }
         input, select { width: 100%; padding: 12px; margin-bottom: 12px; border: 2px solid #f1f5f9; border-radius: 12px; box-sizing: border-box; font-size: 0.95rem; background: #f8fafc; }
         .btn { width: 100%; padding: 14px; border: none; border-radius: 14px; font-weight: 700; cursor: pointer; font-size: 0.95rem; transition: 0.3s; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 8px; }
         .btn-save { background: var(--success); color: white; }
@@ -36,6 +30,7 @@
         .info-text strong { display: block; font-size: 0.9rem; color: var(--secondary); }
         .btn-mini-wa { padding: 6px 12px; background: var(--wa); color: white; border: none; border-radius: 10px; font-weight: bold; font-size: 0.75rem; cursor: pointer; }
         .result-box { margin-top: 15px; padding: 15px; border-radius: 15px; display: none; font-size: 0.9rem; border-left: 5px solid; }
+        .status-cloud { font-size: 0.65rem; color: #94a3b8; margin-top: -10px; margin-bottom: 10px; text-align: right; font-style: italic; }
         .footer { text-align: center; margin-top: 30px; font-size: 0.7rem; color: #94a3b8; border-top: 1px solid #e2e8f0; padding-top: 15px; }
     </style>
 </head>
@@ -50,9 +45,11 @@
 
     <div class="card">
         <div class="section-header" style="margin-top:0;">Input Transaksi</div>
-        <input type="tel" id="phone" placeholder="Nomor WA (Contoh: 0812...)">
+        <input type="tel" id="phone" placeholder="Nomor WA (Contoh: 0812...)" onblur="cekDataCloud()">
+        <div id="statusCloud" class="status-cloud"></div>
+        
         <input type="text" id="name" placeholder="Nama Pelanggan">
-        <label>Tanggal Lahir (Opsional)</label>
+        <label>Tanggal Lahir</label>
         <input type="date" id="dob">
         <input type="number" id="amount" placeholder="Nominal Belanja (Rp)">
         
@@ -83,12 +80,50 @@
 </div>
 
 <script>
-    const SPREADSHEET_URL = "https://script.google.com/macros/s/AKfycbx0Uu38Wuyz4egEHQlrluUTNN-4rqfaWdMKP7jjy2CHP5Bc4b0yfEmb0x_75-hzMHwY/exec"; 
+    // URL Web App Anda yang baru sudah terpasang di sini
+    const SPREADSHEET_URL = "https://script.google.com/macros/s/AKfycbyXuwUxl1GSOAbPVsHoIrBb2gRIongXhVOO7hbUt7sQa9XElxX65LP5nC8N5rVI585u/exec"; 
     const STORAGE_KEY = 'seblaksalah_crm_v3';
     let lastActiveUser = null;
 
     function getDb() { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
     function saveDb(data) { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); refreshDashboards(); }
+
+    async function cekDataCloud() {
+        const phone = document.getElementById('phone').value;
+        if (!phone) return;
+        const statusEl = document.getElementById('statusCloud');
+        statusEl.innerHTML = "Mengecek data di cloud...";
+
+        try {
+            const response = await fetch(`${SPREADSHEET_URL}?phone=${phone}`);
+            const data = await response.json();
+
+            if (data && !data.error) {
+                document.getElementById('name').value = data.name || "";
+                if (data.dob) {
+                    const dateObj = new Date(data.dob);
+                    if (!isNaN(dateObj)) document.getElementById('dob').value = dateObj.toISOString().split('T')[0];
+                }
+                
+                let db = getDb();
+                db[phone] = { 
+                    name: data.name, 
+                    points: data.points, 
+                    lastVisit: data.lastVisit || new Date().toISOString(), 
+                    dob: data.dob || "" 
+                };
+                saveDb(db);
+                statusEl.innerHTML = `✅ Terhubung! Saldo: ${data.points} Pts`;
+                statusEl.style.color = "#27ae60";
+            } else {
+                statusEl.innerHTML = "ℹ️ Pelanggan Baru";
+                statusEl.style.color = "#e67e22";
+            }
+        } catch (e) {
+            statusEl.innerHTML = "⚠️ Cloud tidak merespon.";
+            statusEl.style.color = "#e74c3c";
+        }
+    }
 
     function syncToSheet(phone, name, points, dob) {
         fetch(SPREADSHEET_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ phone, name, points, dob }) });
@@ -99,7 +134,7 @@
         const nameInput = document.getElementById('name').value;
         const dob = document.getElementById('dob').value;
         const amount = parseInt(document.getElementById('amount').value);
-        if (!phone || isNaN(amount) || amount < 10000) return alert("Nomor WA dan Nominal minimal 10rb wajib diisi!");
+        if (!phone || isNaN(amount) || amount < 10000) return alert("Isi nomor WA dan Nominal (min 10rb)!");
 
         let db = getDb();
         const now = new Date().toISOString();
@@ -131,18 +166,12 @@
         if (!lastActiveUser) return;
         const pts = lastActiveUser.points;
         let infoKhusus = "";
-        
-        if (pts >= 25) {
-            infoKhusus = `\n🔥 *Kabar Gembira!* Poin Kakak sudah mencapai *${pts}*. Kakak berhak menukarkan poin ini dengan *1 PORSI SEBLAK LENGKAP* gratis! 😍\n`;
-        } else if (pts >= 20) {
-            infoKhusus = `\n🔥 *Kabar Gembira!* Poin Kakak sudah mencapai *${pts}*. Kakak berhak menukarkan poin ini dengan *DIMSUM* gratis! 🥟\n`;
-        } else if (pts >= 10) {
-            infoKhusus = `\n🔥 *Kabar Gembira!* Poin Kakak sudah mencapai *${pts}*. Kakak berhak menukarkan poin ini dengan *ES TEH MANIS* gratis! 🍹\n`;
-        }
+        if (pts >= 25) infoKhusus = `\n🔥 *Kabar Gembira!* Poin Kakak sudah mencapai *${pts}*. Kakak berhak menukarkan poin ini dengan *1 PORSI SEBLAK LENGKAP* gratis! 😍\n`;
+        else if (pts >= 20) infoKhusus = `\n🔥 *Kabar Gembira!* Poin Kakak sudah mencapai *${pts}*. Kakak berhak menukarkan poin ini dengan *DIMSUM* gratis! 🥟\n`;
+        else if (pts >= 10) infoKhusus = `\n🔥 *Kabar Gembira!* Poin Kakak sudah mencapai *${pts}*. Kakak berhak menukarkan poin ini dengan *ES TEH MANIS* gratis! 🍹\n`;
 
         const katalog = `*Katalog Penukaran Poin:* \n🍹 10 Poin: Es Teh Manis \n🥟 20 Poin: Dimsum \n🍲 25 Poin: Seblak Lengkap`;
         const pesan = `Halo Kak ${lastActiveUser.name}! 👋\n\nTerima kasih sudah mampir ke *Seblak Salah* hari ini. 😊\n\nTransaksi Kakak barusan sudah tercatat. Saldo poin Kakak sekarang: *${pts} Poin*.${infoKhusus}\n${katalog}\n\nDitunggu kedatangannya lagi ya kak!`;
-        
         window.open(`https://wa.me/${lastActiveUser.phone.replace(/^0/, '62')}?text=${encodeURIComponent(pesan)}`, '_blank');
         document.getElementById('btnSapa').style.display = 'none';
     }
@@ -165,9 +194,8 @@
                     countUltah++;
                     const row = document.createElement('div');
                     row.className = 'item-row birthday-row';
-                    const status = isToday ? "HARI INI! 🎂" : "Besok 🎁";
-                    row.innerHTML = `<div class="info-text"><strong>${db[phone].name}</strong>Ultah: ${status}</div>
-                        <button class="btn-mini-wa" onclick="kirimUltah('${phone}', '${db[phone].name}')">Kirim Traktiran</button>`;
+                    row.innerHTML = `<div class="info-text"><strong>${db[phone].name}</strong>Ultah: ${isToday ? "HARI INI! 🎂" : "Besok 🎁"}</div>
+                        <button class="btn-mini-wa" onclick="kirimUltah('${phone}', '${db[phone].name}')">Traktir</button>`;
                     listUltah.appendChild(row);
                 }
             }
@@ -186,7 +214,7 @@
     }
 
     function kirimUltah(phone, nama) {
-        const pesan = `Halo Kak ${nama}! 👋\n\nKami dari *Seblak Salah* ingin mengucapkan *Selamat Ulang Tahun*! 🎂✨\n\nSemoga panjang umur, sehat selalu, dan dilancarkan rezekinya. Sebagai kado spesial, Seblak Salah mau *MENTRAKTIR* Kakak 1 Porsi SEBLAK LENGKAP gratis! 😍\n\nSyaratnya cukup tunjukkan WA ini dan kartu identitas ke kasir. Khusus makan di tempat ya Kak. Ditunggu kedatangannya! 🍲✨`;
+        const pesan = `Halo Kak ${nama}! 👋\n\nKami dari *Seblak Salah* ingin mengucapkan *Selamat Ulang Tahun*! 🎂✨\n\nSemoga panjang umur & sehat selalu. Sebagai kado spesial, Seblak Salah mau *MENTRAKTIR* Kakak 1 Porsi SEBLAK LENGKAP gratis! 😍\n\nTunjukkan WA ini & identitas ke kasir ya. Makan di tempat. Ditunggu! 🍲✨`;
         window.open(`https://wa.me/${phone.replace(/^0/, '62')}?text=${encodeURIComponent(pesan)}`, '_blank');
     }
 
@@ -201,21 +229,13 @@
         const cost = parseInt(document.getElementById('reward').value);
         let db = getDb();
         if (!db[phone] || db[phone].points < cost) return alert("Poin kurang!");
-        
-        // Pengurangan Poin
         db[phone].points -= cost;
         db[phone].lastVisit = new Date().toISOString();
-        
-        // Simpan & Update Tampilan
         saveDb(db);
         syncToSheet(phone, db[phone].name, db[phone].points, db[phone].dob);
-        
         const out = document.getElementById('output');
-        out.style.display = 'block';
-        out.style.background = '#fef2f2';
-        out.style.color = '#991b1b';
+        out.style.display = 'block'; out.style.background = '#fef2f2'; out.style.color = '#991b1b';
         out.innerHTML = `🎁 <strong>Redeem Berhasil!</strong><br>Sisa Saldo ${db[phone].name}: ${db[phone].points} Pts`;
-        document.getElementById('btnSapa').style.display = 'none';
     }
 
     window.onload = refreshDashboards;
