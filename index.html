@@ -49,8 +49,10 @@
         <label>Tanggal Lahir</label>
         <input type="date" id="dob">
         <input type="number" id="amount" placeholder="Nominal Belanja (Rp)">
+        
         <button id="btnSave" class="btn btn-save" onclick="tambahPoin()">Simpan Transaksi</button>
         <button id="btnSapa" class="btn btn-wa" style="display: none; background-color: var(--wa); color: white;" onclick="sapaPelanggan()">Kirim Sapaan (WA)</button>
+        
         <div class="section-header">REDEEM REWARD</div>
         <select id="reward">
             <option value="10">Es Teh Manis (10 Pts)</option>
@@ -75,7 +77,8 @@
 </div>
 
 <script>
-    const SPREADSHEET_URL = "https://script.google.com/macros/s/AKfycbxykYyWhGQG_5HgORwfLAkP6YHgY9abiv2jsGvClY2dNZbghz8vQmyY_AV58_n5wMlD/exec"; 
+    // URL SPREADSHEET TERBARU
+    const SPREADSHEET_URL = "https://script.google.com/macros/s/AKfycbw9igPaZCPki6rR4l0FxUq0W5V9hfHe-AVhpWQNxAETunK-LwKzBb6sTFB42G6OgdNq/exec"; 
     const STORAGE_KEY = 'seblaksalah_crm_v3';
     let lastActiveUser = null;
 
@@ -99,15 +102,9 @@
             if (data && !data.error) {
                 document.getElementById('name').value = data.name || "";
                 
-                // PERBAIKAN: Memaksa data tanggal lahir tampil di input iPad
+                // KUNCI FIX: Menampilkan tanggal lahir sebagai teks murni agar tidak bergeser satu hari
                 if (data.dob) {
-                    let dateStr = "";
-                    if (typeof data.dob === 'string') {
-                        dateStr = data.dob.split('T')[0];
-                    } else {
-                        dateStr = new Date(data.dob).toISOString().split('T')[0];
-                    }
-                    document.getElementById('dob').value = dateStr;
+                    document.getElementById('dob').value = data.dob;
                 }
 
                 let db = getDb();
