@@ -63,12 +63,12 @@
 
     <div class="card">
         <div class="section-header" style="color: var(--birthday);">🎂 PENGINGAT ULANG TAHUN (H-1)</div>
-        <div id="listUltah"><p style="text-align: center; font-size: 0.8rem; color: #999;">Tidak ada yang ultah terdekat.</p></div>
+        <div id="listUltah"></div>
     </div>
 
     <div class="card">
         <div class="section-header">🚪 DASHBOARD FOLLOW-UP (≥ 7 HARI)</div>
-        <div id="listFollowUp"><p style="text-align: center; font-size: 0.8rem; color: #999;">Memuat data...</p></div>
+        <div id="listFollowUp"></div>
     </div>
 
     <div class="footer">Developed by <strong>Araya Consulting</strong> &copy; 2026</div>
@@ -98,7 +98,18 @@
             const data = await response.json();
             if (data && !data.error) {
                 document.getElementById('name').value = data.name || "";
-                if (data.dob) document.getElementById('dob').value = data.dob;
+                
+                // PERBAIKAN: Memaksa data tanggal lahir tampil di input iPad
+                if (data.dob) {
+                    let dateStr = "";
+                    if (typeof data.dob === 'string') {
+                        dateStr = data.dob.split('T')[0];
+                    } else {
+                        dateStr = new Date(data.dob).toISOString().split('T')[0];
+                    }
+                    document.getElementById('dob').value = dateStr;
+                }
+
                 let db = getDb();
                 db[phone] = { name: data.name, points: data.points, lastVisit: data.lastVisit, dob: data.dob, sisaUang: data.sisaUang || 0 };
                 saveDb(db);
@@ -129,7 +140,7 @@
         updateStatusUI(db[phone].points, db[phone].sisaUang);
         const out = document.getElementById('output');
         out.style.display = 'block'; out.style.background = '#f0fdf4';
-        out.innerHTML = `✅ <strong>Berhasil!</strong><br>Poin: ${db[phone].points} | Sisa: Rp${db[phone].sisaUang}`;
+        out.innerHTML = `✅ <strong>Berhasil!</strong><br>Poin: ${db[phone].points} | Tabungan Sisa: Rp${db[phone].sisaUang}`;
         document.getElementById('btnSapa').style.display = 'flex';
         document.getElementById('amount').value = "";
     }
@@ -152,12 +163,14 @@
         listUltah.innerHTML = ""; listFollowUp.innerHTML = "";
         const today = new Date();
         const tomorrow = new Date(); tomorrow.setDate(today.getDate() + 1);
+        let countUltah = 0;
         for (let phone in db) {
             if (db[phone].dob) {
                 const bday = new Date(db[phone].dob);
                 const isToday = bday.getDate() === today.getDate() && bday.getMonth() === today.getMonth();
                 const isTomorrow = bday.getDate() === tomorrow.getDate() && bday.getMonth() === tomorrow.getMonth();
                 if (isToday || isTomorrow) {
+                    countUltah++;
                     const row = document.createElement('div'); row.className = 'item-row birthday-row';
                     row.innerHTML = `<div class="info-text"><strong>${db[phone].name}</strong>Ultah: ${isToday ? "HARI INI!" : "Besok"}</div><button class="btn-mini-wa" onclick="kirimUltah('${phone}', '${db[phone].name}')">Traktir</button>`;
                     listUltah.appendChild(row);
@@ -173,6 +186,7 @@
                 }
             }
         }
+        if (countUltah === 0) listUltah.innerHTML = '<p style="text-align: center; font-size: 0.8rem; color: #999;">Tidak ada yang ultah terdekat.</p>';
     }
 
     function kirimUltah(phone, nama) {
@@ -198,7 +212,7 @@
         updateStatusUI(db[phone].points, db[phone].sisaUang);
         const out = document.getElementById('output');
         out.style.display = 'block'; out.style.background = '#fef2f2';
-        out.innerHTML = `🎁 <strong>Redeem Berhasil!</strong><br>Sisa Poin ${db[phone].name}: ${db[phone].points} Pts`;
+        out.innerHTML = `🎁 <strong>Redeem Berhasil!</strong><br>Sisa Saldo ${db[phone].name}: ${db[phone].points} Pts`;
         document.getElementById('btnSapa').style.display = 'flex';
     }
     window.onload = refreshDashboards;
