@@ -77,7 +77,7 @@
 </div>
 
 <script>
-    // URL SPREADSHEET TERBARU
+    // URL Deployment terbaru Bapak Ali Mahfud
     const SPREADSHEET_URL = "https://script.google.com/macros/s/AKfycbw9igPaZCPki6rR4l0FxUq0W5V9hfHe-AVhpWQNxAETunK-LwKzBb6sTFB42G6OgdNq/exec"; 
     const STORAGE_KEY = 'seblaksalah_crm_v3';
     let lastActiveUser = null;
@@ -102,16 +102,24 @@
             if (data && !data.error) {
                 document.getElementById('name').value = data.name || "";
                 
-                // KUNCI FIX: Menampilkan tanggal lahir sebagai teks murni agar tidak bergeser satu hari
+                // PERBAIKAN PERMANEN: Menampilkan tanggal lahir mentah (yyyy-mm-dd) 
+                // supaya iPad tidak menggeser hari karena zona waktu.
                 if (data.dob) {
-                    document.getElementById('dob').value = data.dob;
+                    let cleanDate = data.dob;
+                    if (cleanDate.includes("T")) cleanDate = cleanDate.split("T")[0];
+                    document.getElementById('dob').value = cleanDate;
                 }
 
                 let db = getDb();
                 db[phone] = { name: data.name, points: data.points, lastVisit: data.lastVisit, dob: data.dob, sisaUang: data.sisaUang || 0 };
                 saveDb(db);
                 updateStatusUI(data.points, data.sisaUang);
-            } else { statusEl.innerHTML = "ℹ️ Pelanggan Baru"; statusEl.style.color = "#e67e22"; }
+            } else { 
+                statusEl.innerHTML = "ℹ️ Pelanggan Baru"; 
+                statusEl.style.color = "#e67e22";
+                document.getElementById('name').value = "";
+                document.getElementById('dob').value = "";
+            }
         } catch (e) { statusEl.innerHTML = "⚠️ Cloud error."; }
     }
 
@@ -137,7 +145,7 @@
         updateStatusUI(db[phone].points, db[phone].sisaUang);
         const out = document.getElementById('output');
         out.style.display = 'block'; out.style.background = '#f0fdf4';
-        out.innerHTML = `✅ <strong>Berhasil!</strong><br>Poin: ${db[phone].points} | Tabungan Sisa: Rp${db[phone].sisaUang}`;
+        out.innerHTML = `✅ <strong>Berhasil!</strong><br>Poin: ${db[phone].points} | Sisa: Rp${db[phone].sisaUang}`;
         document.getElementById('btnSapa').style.display = 'flex';
         document.getElementById('amount').value = "";
     }
@@ -211,6 +219,9 @@
         out.style.display = 'block'; out.style.background = '#fef2f2';
         out.innerHTML = `🎁 <strong>Redeem Berhasil!</strong><br>Sisa Saldo ${db[phone].name}: ${db[phone].points} Pts`;
         document.getElementById('btnSapa').style.display = 'flex';
+        
+        // Memastikan tanggal lahir tetap ada setelah redeem
+        document.getElementById('dob').value = db[phone].dob;
     }
     window.onload = refreshDashboards;
 </script>
