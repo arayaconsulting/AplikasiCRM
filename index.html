@@ -10,13 +10,13 @@
             --secondary: #2c3e50;
             --success: #27ae60;
             --wa: #25d366;
+            --birthday: #3498db;
             --bg: #f4f7f6;
             --card: #ffffff;
         }
         body { font-family: 'Segoe UI', Roboto, sans-serif; background: var(--bg); margin: 0; padding: 15px; color: #333; }
         .container { max-width: 500px; margin: auto; }
         
-        /* Branding Section */
         .branding { text-align: center; margin-bottom: 25px; }
         .branding img { max-width: 140px; height: auto; margin-bottom: 5px; }
         .branding h1 { font-size: 1.6rem; color: var(--primary); margin: 0; font-weight: 800; }
@@ -28,19 +28,20 @@
         .section-header::after { content: ""; flex: 1; height: 1px; background: #e2e8f0; margin-left: 10px; }
 
         label { font-size: 0.8rem; font-weight: 600; display: block; margin-bottom: 4px; color: #475569; }
-        input, select { width: 100%; padding: 12px; margin-bottom: 12px; border: 2px solid #f1f5f9; border-radius: 12px; box-sizing: border-box; font-size: 0.95rem; transition: 0.3s; background: #f8fafc; }
-        input:focus { border-color: var(--primary); outline: none; background: #fff; }
+        input, select { width: 100%; padding: 12px; margin-bottom: 12px; border: 2px solid #f1f5f9; border-radius: 12px; box-sizing: border-box; font-size: 0.95rem; background: #f8fafc; }
 
         .btn { width: 100%; padding: 14px; border: none; border-radius: 14px; font-weight: 700; cursor: pointer; font-size: 0.95rem; transition: 0.3s; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 8px; }
-        .btn-save { background: var(--success); color: white; box-shadow: 0 4px 12px rgba(39, 174, 96, 0.2); }
-        .btn-wa { background: var(--wa); color: white; display: none; box-shadow: 0 4px 12px rgba(37, 211, 102, 0.2); }
+        .btn-save { background: var(--success); color: white; }
+        .btn-wa { background: var(--wa); color: white; display: none; }
         .btn-redeem { background: var(--secondary); color: white; }
-        .btn:active { transform: scale(0.97); }
         
-        /* Dashboard Follow Up */
-        .follow-up-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; background: #fff5eb; border-radius: 15px; margin-bottom: 8px; border: 1px solid #ffe0b2; }
-        .follow-up-info { font-size: 0.8rem; }
-        .follow-up-info strong { display: block; font-size: 0.9rem; color: var(--secondary); }
+        /* Dashboard Items */
+        .item-row { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-radius: 15px; margin-bottom: 8px; border: 1px solid; }
+        .follow-up { background: #fff5eb; border-color: #ffe0b2; }
+        .birthday-row { background: #eef7ff; border-color: #cde4f7; }
+        
+        .info-text { font-size: 0.8rem; }
+        .info-text strong { display: block; font-size: 0.9rem; color: var(--secondary); }
         .btn-mini-wa { padding: 6px 12px; background: var(--wa); color: white; border: none; border-radius: 10px; font-weight: bold; font-size: 0.75rem; cursor: pointer; }
 
         .result-box { margin-top: 15px; padding: 15px; border-radius: 15px; display: none; font-size: 0.9rem; border-left: 5px solid; }
@@ -58,12 +59,10 @@
 
     <div class="card">
         <div class="section-header" style="margin-top:0;">Input Transaksi</div>
-        <input type="tel" id="phone" placeholder="Nomor WhatsApp (Contoh: 0812...)">
+        <input type="tel" id="phone" placeholder="Nomor WA (Contoh: 0812...)">
         <input type="text" id="name" placeholder="Nama Pelanggan">
-        
-        <label>Tanggal Lahir (Opsional)</label>
+        <label>Tanggal Lahir (H-1 Ultah akan muncul pengingat)</label>
         <input type="date" id="dob">
-        
         <input type="number" id="amount" placeholder="Nominal Belanja (Rp)">
         
         <button id="btnSave" class="btn btn-save" onclick="tambahPoin()">Simpan & Update Cloud</button>
@@ -76,38 +75,32 @@
             <option value="25">Seblak Lengkap (25 Pts)</option>
         </select>
         <button class="btn btn-redeem" onclick="redeemPoin()">Redeem Sekarang</button>
-        
         <div id="output" class="result-box"></div>
     </div>
 
     <div class="card">
-        <div class="section-header" style="margin-top:0;">Dashboard Follow-Up (≥ 7 Hari)</div>
-        <div id="listFollowUp">
-            <p style="text-align: center; font-size: 0.8rem; color: #999;">Memuat data pelanggan...</p>
-        </div>
+        <div class="section-header" style="color: var(--birthday);">🎂 Pengingat Ulang Tahun (H-1)</div>
+        <div id="listUltah"><p style="text-align: center; font-size: 0.8rem; color: #999;">Tidak ada yang ultah hari ini/besok.</p></div>
     </div>
 
-    <div class="footer">
-        Powered by <strong>Araya Consulting</strong><br>
-        Sistem Manajemen Loyalitas Digital &copy; 2026
+    <div class="card">
+        <div class="section-header">🚪 Dashboard Follow-Up (≥ 7 Hari)</div>
+        <div id="listFollowUp"><p style="text-align: center; font-size: 0.8rem; color: #999;">Memuat data...</p></div>
     </div>
+
+    <div class="footer">Developed by <strong>Araya Consulting</strong> &copy; 2026</div>
 </div>
 
 <script>
-    // URL Web App Google Apps Script Anda
     const SPREADSHEET_URL = "https://script.google.com/macros/s/AKfycbx0Uu38Wuyz4egEHQlrluUTNN-4rqfaWdMKP7jjy2CHP5Bc4b0yfEmb0x_75-hzMHwY/exec"; 
     const STORAGE_KEY = 'seblaksalah_crm_v3';
     let lastActiveUser = null;
 
     function getDb() { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
-    function saveDb(data) { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); refreshFollowUpList(); }
+    function saveDb(data) { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); refreshDashboards(); }
 
     function syncToSheet(phone, name, points, dob) {
-        fetch(SPREADSHEET_URL, { 
-            method: 'POST', 
-            mode: 'no-cors', 
-            body: JSON.stringify({ phone, name, points, dob }) 
-        });
+        fetch(SPREADSHEET_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ phone, name, points, dob }) });
     }
 
     function tambahPoin() {
@@ -115,12 +108,11 @@
         const nameInput = document.getElementById('name').value;
         const dob = document.getElementById('dob').value;
         const amount = parseInt(document.getElementById('amount').value);
-        
-        if (!phone || isNaN(amount) || amount < 10000) return alert("Nomor WA dan Nominal minimal 10rb wajib diisi!");
+        if (!phone || isNaN(amount) || amount < 10000) return alert("Data wajib diisi!");
 
-        const poinBaru = Math.floor(amount / 10000);
         let db = getDb();
         const now = new Date().toISOString();
+        const poinBaru = Math.floor(amount / 10000);
 
         if (db[phone]) {
             db[phone].points += poinBaru;
@@ -139,57 +131,68 @@
         out.style.display = 'block';
         out.style.background = '#f0fdf4';
         out.style.color = '#166534';
-        out.style.borderColor = '#22c55e';
-        out.innerHTML = `✅ <strong>Poin Berhasil Ditambah!</strong><br>Saldo ${db[phone].name}: <strong>${db[phone].points} Pts</strong>`;
-        
+        out.innerHTML = `✅ <strong>Berhasil!</strong><br>Saldo ${db[phone].name}: ${db[phone].points} Pts`;
         document.getElementById('btnSapa').style.display = 'flex';
         document.getElementById('amount').value = "";
     }
 
     function sapaPelanggan() {
         if (!lastActiveUser) return;
-        const katalog = `*Katalog Penukaran Poin:* \n🍹 10 Poin: Es Teh Manis \n🥟 20 Poin: Dimsum \n🍲 25 Poin: Seblak Lengkap`;
-        const pesan = `Halo Kak ${lastActiveUser.name}! 👋\n\nTerima kasih sudah mampir ke *Seblak Salah* hari ini. 😊\n\nTransaksi Kakak barusan sudah tercatat. Saldo poin Kakak sekarang: *${lastActiveUser.points} Poin*.\n\n${katalog}\n\nDitunggu kedatangannya lagi ya kak!`;
-        
+        const pesan = `Halo Kak ${lastActiveUser.name}! 👋\n\nTerima kasih sudah mampir ke *Seblak Salah*. Saldo poin Kakak sekarang: *${lastActiveUser.points} Poin*.\n\nDitunggu kedatangannya lagi ya!`;
         window.open(`https://wa.me/${lastActiveUser.phone.replace(/^0/, '62')}?text=${encodeURIComponent(pesan)}`, '_blank');
         document.getElementById('btnSapa').style.display = 'none';
     }
 
-    function refreshFollowUpList() {
+    function refreshDashboards() {
         const db = getDb();
-        const listContainer = document.getElementById('listFollowUp');
-        listContainer.innerHTML = "";
+        const listUltah = document.getElementById('listUltah');
+        const listFollowUp = document.getElementById('listFollowUp');
+        listUltah.innerHTML = ""; listFollowUp.innerHTML = "";
+        
         const today = new Date();
-        let count = 0;
+        const tomorrow = new Date(); tomorrow.setDate(today.getDate() + 1);
+        let countUltah = 0, countFollow = 0;
 
         for (let phone in db) {
-            const lastVisit = new Date(db[phone].lastVisit);
-            const diffDays = Math.ceil(Math.abs(today - lastVisit) / (1000 * 60 * 60 * 24));
+            // 1. Logika Ultah (H-1)
+            if (db[phone].dob) {
+                const bday = new Date(db[phone].dob);
+                const isToday = bday.getDate() === today.getDate() && bday.getMonth() === today.getMonth();
+                const isTomorrow = bday.getDate() === tomorrow.getDate() && bday.getMonth() === tomorrow.getMonth();
 
+                if (isToday || isTomorrow) {
+                    countUltah++;
+                    const row = document.createElement('div');
+                    row.className = 'item-row birthday-row';
+                    const status = isToday ? "HARI INI! 🎂" : "Besok 🎁";
+                    row.innerHTML = `<div class="info-text"><strong>${db[phone].name}</strong>Ultah: ${status}</div>
+                        <button class="btn-mini-wa" onclick="kirimUltah('${phone}', '${db[phone].name}')">Kirim Traktiran</button>`;
+                    listUltah.appendChild(row);
+                }
+            }
+
+            // 2. Logika Follow Up
+            const diffDays = Math.ceil(Math.abs(today - new Date(db[phone].lastVisit)) / (1000 * 60 * 60 * 24));
             if (diffDays >= 7) {
-                count++;
-                const item = document.createElement('div');
-                item.className = 'follow-up-item';
-                item.innerHTML = `
-                    <div class="follow-up-info">
-                        <strong>${db[phone].name}</strong>
-                        ${diffDays} hari tidak mampir (${db[phone].points} Pts)
-                    </div>
-                    <button class="btn-mini-wa" onclick="kirimRindu('${phone}', '${db[phone].name}', ${db[phone].points}, ${diffDays})">Sapa</button>
-                `;
-                listContainer.appendChild(item);
+                countFollow++;
+                const row = document.createElement('div');
+                row.className = 'item-row follow-up';
+                row.innerHTML = `<div class="info-text"><strong>${db[phone].name}</strong>${diffDays} hari tidak mampir</div>
+                    <button class="btn-mini-wa" onclick="kirimRindu('${phone}', '${db[phone].name}', ${db[phone].points}, ${diffDays})">Sapa</button>`;
+                listFollowUp.appendChild(row);
             }
         }
+        if (countUltah === 0) listUltah.innerHTML = '<p style="text-align: center; font-size: 0.8rem; color: #999;">Tidak ada yang ultah terdekat.</p>';
+        if (countFollow === 0) listFollowUp.innerHTML = '<p style="text-align: center; font-size: 0.8rem; color: #999;">Semua pelanggan aktif mampir! 😊</p>';
+    }
 
-        if (count === 0) {
-            listContainer.innerHTML = '<p style="text-align: center; font-size: 0.8rem; color: #999;">Semua pelanggan rajin mampir! 😊</p>';
-        }
+    function kirimUltah(phone, nama) {
+        const pesan = `Halo Kak ${nama}! 👋\n\nKami dari *Seblak Salah* ingin mengucapkan *Selamat Ulang Tahun*! 🎂✨\n\nSemoga panjang umur, sehat selalu, dan dilancarkan rezekinya. Sebagai kado spesial, Seblak Salah mau *MENTRAKTIR* Kakak 1 Porsi SEBLAK LENGKAP gratis! 😍\n\nSyaratnya cukup tunjukkan WA ini dan kartu identitas ke kasir. Khusus makan di tempat ya Kak. Ditunggu kedatangannya! 🍲✨`;
+        window.open(`https://wa.me/${phone.replace(/^0/, '62')}?text=${encodeURIComponent(pesan)}`, '_blank');
     }
 
     function kirimRindu(phone, nama, poin, hari) {
-        const katalog = `*Hadiah Poin:* \n🍹 10 Pts: Es Teh \n🥟 20 Pts: Dimsum \n🍲 25 Pts: Seblak Lengkap`;
-        const pesan = `Selamat Siang Kak ${nama}, kangen nih dari *Seblak Salah*! ✨\n\nSudah ${hari} hari Kakak tidak mampir. Saldo Kakak masih ada *${poin} Poin*. \n\n${katalog} \n\nYuk, mampir hari ini dan nikmati menu favorit kakak!`;
-        
+        const pesan = `Halo Kak ${nama}, kangen nih dari *Seblak Salah*! ✨ Sudah ${hari} hari Kakak tidak mampir. Saldo Kakak: *${poin} Pts*. Yuk mampir!`;
         window.open(`https://wa.me/${phone.replace(/^0/, '62')}?text=${encodeURIComponent(pesan)}`, '_blank');
     }
 
@@ -197,24 +200,15 @@
         const phone = document.getElementById('phone').value;
         const cost = parseInt(document.getElementById('reward').value);
         let db = getDb();
-        
-        if (!db[phone] || db[phone].points < cost) return alert("Poin tidak cukup!");
-        
+        if (!db[phone] || db[phone].points < cost) return alert("Poin kurang!");
         db[phone].points -= cost;
         db[phone].lastVisit = new Date().toISOString();
         saveDb(db);
         syncToSheet(phone, db[phone].name, db[phone].points, db[phone].dob);
-        
-        const out = document.getElementById('output');
-        out.style.display = 'block';
-        out.style.background = '#fef2f2';
-        out.style.color = '#991b1b';
-        out.style.borderColor = '#ef4444';
-        out.innerHTML = `🎁 <strong>Redeem Berhasil!</strong><br>Sisa Saldo ${db[phone].name}: ${db[phone].points} Pts`;
+        alert("Redeem Berhasil!");
     }
 
-    window.onload = refreshFollowUpList;
+    window.onload = refreshDashboards;
 </script>
-
 </body>
 </html>
