@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRM Seblak Salah - Self Service</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; background: #f9f9f9; color: #333; }
+        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); max-width: 400px; margin: auto; }
+        h2, h3 { color: #e67e22; text-align: center; margin-bottom: 5px; }
+        .subtitle { text-align: center; font-size: 0.8em; color: #666; margin-bottom: 20px; }
+        label { font-size: 0.9em; font-weight: bold; display: block; margin-top: 10px; }
+        input, select { width: 100%; padding: 12px; margin: 5px 0 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        
+        .btn-group { display: flex; gap: 10px; margin-bottom: 10px; }
+        button { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        
+        .btn-save { background: #27ae60; color: white; }
+        .btn-check { background: #3498db; color: white; }
+        .btn-redeem { background: #e67e22; color: white; margin-top: 10px; }
+        
+        button:active { transform: scale(0.98); }
+        
+        .result { margin-top: 20px; padding: 15px; border-radius: 8px; background: #fff3e0; border-left: 5px solid #e67e22; display: none; }
+        hr { border: 0; border-top: 1px solid #eee; margin: 20px 0; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>Seblak Salah</h2>
+    <p class="subtitle">Belanja Rp10.000 = 1 Poin</p>
+    
+    <label>Nomor WhatsApp</label>
+    <input type="text" id="phone" placeholder="Contoh: 08123456789">
+    
+    <div class="btn-group">
+        <button class="btn-check" onclick="cekPoin()">Cek Saldo Poin</button>
+    </div>
+
+    <hr>
+
+    <label>Nama Pelanggan (Hanya untuk daftar baru)</label>
+    <input type="text" id="name" placeholder="Nama Anda">
+    
+    <label>Total Belanja (Rp)</label>
+    <input type="number" id="amount" placeholder="Input nominal belanja">
+    
+    <button class="btn-save" onclick="tambahPoin()">Simpan & Tambah Poin</button>
+
+    <hr>
+
+    <h3>Tukar Hadiah</h3>
+    <select id="reward">
+        <option value="10">Es Teh Manis (10 Pts)</option>
+        <option value="25">Kerupuk Kaleng (25 Pts)</option>
+        <option value="50">Seblak Komplit (50 Pts)</option>
+    </select>
+    <button class="btn-redeem" onclick="redeemPoin()">Tukarkan Poin</button>
+
+    <div id="output" class="result"></div>
+</div>
+
+<script>
+    function getDb() { return JSON.parse(localStorage.getItem('crm_seblak')) || {}; }
+    function saveDb(data) { localStorage.setItem('crm_seblak', JSON.stringify(data)); }
+
+    function showOutput(msg, color = "#fff3e0", border = "#e67e22") {
+        const out = document.getElementById('output');
+        out.style.display = 'block';
+        out.style.background = color;
+        out.style.borderLeftColor = border;
+        out.innerHTML = msg;
+    }
+
+    // FITUR BARU: CEK POIN
+    function cekPoin() {
+        const phone = document.getElementById('phone').value;
+        let db = getDb();
+
+        if (!phone) {
+            alert("Masukkan nomor WhatsApp untuk cek poin!");
+            return;
+        }
+
+        if (db[phone]) {
+            showOutput(`
+                <strong>Informasi Pelanggan</strong><br>
+                Nama: ${db[phone].name}<br>
+                Total Poin: <span style="font-size:1.2em; color:#e67e22;"><strong>${db[phone].points} Pts</strong></span>
+            `, "#e3f2fd", "#3498db");
+        } else {
+            showOutput("Nomor tidak terdaftar. Silakan lakukan transaksi pertama untuk daftar.", "#ffebee", "#f44336");
+        }
+    }
+
+    function tambahPoin() {
+        const phone = document.getElementById('phone').value;
+        let name = document.getElementById('name').value;
+        const amount = parseInt(document.getElementById('amount').value);
+
+        if (!phone || isNaN(amount) || amount < 10000) {
+            alert("Isi nomor HP dan belanja minimal Rp10.000!");
+            return;
+        }
+
+        const poinBaru = Math.floor(amount / 10000);
+        let db = getDb();
+
+        if (db[phone]) {
+            db[phone].points += poinBaru;
+            db[phone].history.push({ date: new Date().toLocaleString(), type: 'Add', pts: poinBaru });
+        } else {
+            db[phone] = {
+                name: name || "Pelanggan Baru",
+                points: poinBaru,
+                history: [{ date: new Date().toLocaleString(), type: 'Reg', pts: poinBaru }]
+            };
+        }
+
+        saveDb(db);
+        showOutput(`
+            <strong>Poin Berhasil Ditambah!</strong><br>
+            Nama: ${db[phone].name}<br>
+            Poin Baru: +${poinBaru}<br>
+            <strong>Total Poin Sekarang: ${db[phone].points}</strong>
+        `);
+        document.getElementById('amount').value = "";
+    }
+
+    function redeemPoin() {
+        const phone = document.getElementById('phone').value;
+        const rewardSelect = document.getElementById('reward');
+        const cost = parseInt(rewardSelect.value);
+        const rewardName = rewardSelect.options[rewardSelect.selectedIndex].text;
+
+        let db = getDb();
+
+        if (!phone || !db[phone]) {
+            alert("Nomor HP belum terdaftar!");
+            return;
+        }
+
+        if (db[phone].points < cost) {
+            alert(`Poin tidak cukup! Butuh ${cost} poin.`);
+            return;
+        }
+
+        db[phone].points -= cost;
+        db[phone].history.push({ date: new Date().toLocaleString(), type: 'Redeem', item: rewardName, pts: -cost });
+
+        saveDb(db);
+        showOutput(`
+            <strong>Redeem Sukses!</strong><br>
+            Hadiah: ${rewardName}<br>
+            Sisa Poin: <strong>${db[phone].points}</strong>
+        `);
+    }
+</script>
+
+</body>
+</html>
