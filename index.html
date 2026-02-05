@@ -38,11 +38,11 @@
     <div class="branding">
         <img src="logo.png" alt="Araya Consulting">
         <h1>Seblak Salah</h1>
-        <p>Loyalty Program Management</p>
+        <p>LOYALTY PROGRAM MANAGEMENT</p>
     </div>
 
     <div class="card">
-        <div class="section-header" style="margin-top:0;">Input Transaksi</div>
+        <div class="section-header" style="margin-top:0;">INPUT TRANSAKSI</div>
         <input type="tel" id="phone" placeholder="Nomor WA (Contoh: 0812...)" onblur="cekDataCloud()">
         <div id="statusCloud" class="status-cloud"></div>
         <input type="text" id="name" placeholder="Nama Pelanggan">
@@ -50,8 +50,8 @@
         <input type="date" id="dob">
         <input type="number" id="amount" placeholder="Nominal Belanja (Rp)">
         <button id="btnSave" class="btn btn-save" onclick="tambahPoin()">Simpan Transaksi</button>
-        <button id="btnSapa" class="btn btn-wa" onclick="sapaPelanggan()">Kirim Sapaan (WA)</button>
-        <div class="section-header">Redeem Reward</div>
+        <button id="btnSapa" class="btn btn-wa" style="display: none; background-color: var(--wa); color: white;" onclick="sapaPelanggan()">Kirim Sapaan (WA)</button>
+        <div class="section-header">REDEEM REWARD</div>
         <select id="reward">
             <option value="10">Es Teh Manis (10 Pts)</option>
             <option value="20">Dimsum (20 Pts)</option>
@@ -62,12 +62,12 @@
     </div>
 
     <div class="card">
-        <div class="section-header" style="color: var(--birthday);">🎂 Pengingat Ulang Tahun (H-1)</div>
+        <div class="section-header" style="color: var(--birthday);">🎂 PENGINGAT ULANG TAHUN (H-1)</div>
         <div id="listUltah"><p style="text-align: center; font-size: 0.8rem; color: #999;">Tidak ada yang ultah terdekat.</p></div>
     </div>
 
     <div class="card">
-        <div class="section-header">🚪 Dashboard Follow-Up (≥ 7 Hari)</div>
+        <div class="section-header">🚪 DASHBOARD FOLLOW-UP (≥ 7 HARI)</div>
         <div id="listFollowUp"><p style="text-align: center; font-size: 0.8rem; color: #999;">Memuat data...</p></div>
     </div>
 
@@ -75,13 +75,18 @@
 </div>
 
 <script>
-    // URL Deployment terbaru Bapak Ali Mahfud
-    const SPREADSHEET_URL = "https://script.google.com/macros/s/AKfycbxbFtS6kJ6f2LQgZNGWnTvvEN4Z9TL1_XCUpacmYHGPxXkIKCB7YqLYETgyPukNvKB0/exec"; 
+    const SPREADSHEET_URL = "https://script.google.com/macros/s/AKfycbxykYyWhGQG_5HgORwfLAkP6YHgY9abiv2jsGvClY2dNZbghz8vQmyY_AV58_n5wMlD/exec"; 
     const STORAGE_KEY = 'seblaksalah_crm_v3';
     let lastActiveUser = null;
 
     function getDb() { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
     function saveDb(data) { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); refreshDashboards(); }
+
+    function updateStatusUI(pts, sisa) {
+        const statusEl = document.getElementById('statusCloud');
+        statusEl.innerHTML = `✅ Saldo: ${pts} Pts | Sisa: Rp${sisa}`;
+        statusEl.style.color = "#27ae60";
+    }
 
     async function cekDataCloud() {
         const phone = document.getElementById('phone').value;
@@ -93,19 +98,12 @@
             const data = await response.json();
             if (data && !data.error) {
                 document.getElementById('name').value = data.name || "";
-                if (data.dob) {
-                    const d = new Date(data.dob);
-                    if(!isNaN(d)) document.getElementById('dob').value = d.toISOString().split('T')[0];
-                }
+                if (data.dob) document.getElementById('dob').value = data.dob;
                 let db = getDb();
                 db[phone] = { name: data.name, points: data.points, lastVisit: data.lastVisit, dob: data.dob, sisaUang: data.sisaUang || 0 };
                 saveDb(db);
-                statusEl.innerHTML = `✅ Saldo: ${data.points} Pts | Sisa: Rp${data.sisaUang}`;
-                statusEl.style.color = "#27ae60";
-            } else { 
-                statusEl.innerHTML = "ℹ️ Pelanggan Baru"; 
-                statusEl.style.color = "#e67e22"; 
-            }
+                updateStatusUI(data.points, data.sisaUang);
+            } else { statusEl.innerHTML = "ℹ️ Pelanggan Baru"; statusEl.style.color = "#e67e22"; }
         } catch (e) { statusEl.innerHTML = "⚠️ Cloud error."; }
     }
 
@@ -122,24 +120,16 @@
         let poinBaru = Math.floor(totalUang / 10000);
         let sisaBaru = totalUang % 10000;
         if (db[phone]) {
-            db[phone].points += poinBaru; 
-            db[phone].sisaUang = sisaBaru; 
-            db[phone].lastVisit = now;
-            if(nameInput) db[phone].name = nameInput; 
-            if(dobInput) db[phone].dob = dobInput;
-        } else { 
-            db[phone] = { name: nameInput || "Pelanggan", points: poinBaru, lastVisit: now, dob: dobInput || "", sisaUang: sisaBaru }; 
-        }
+            db[phone].points += poinBaru; db[phone].sisaUang = sisaBaru; db[phone].lastVisit = now;
+            if(nameInput) db[phone].name = nameInput; if(dobInput) db[phone].dob = dobInput;
+        } else { db[phone] = { name: nameInput || "Pelanggan", points: poinBaru, lastVisit: now, dob: dobInput || "", sisaUang: sisaBaru }; }
         saveDb(db);
-        fetch(SPREADSHEET_URL, { 
-            method: 'POST', 
-            mode: 'no-cors', 
-            body: JSON.stringify({ phone, name: db[phone].name, points: db[phone].points, dob: db[phone].dob, amount }) 
-        });
+        fetch(SPREADSHEET_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ phone, name: db[phone].name, points: db[phone].points, dob: db[phone].dob, amount }) });
         lastActiveUser = { phone, ...db[phone] };
+        updateStatusUI(db[phone].points, db[phone].sisaUang);
         const out = document.getElementById('output');
         out.style.display = 'block'; out.style.background = '#f0fdf4';
-        out.innerHTML = `✅ <strong>Berhasil!</strong><br>Poin: ${db[phone].points} | Tabungan Sisa: Rp${db[phone].sisaUang}`;
+        out.innerHTML = `✅ <strong>Berhasil!</strong><br>Poin: ${db[phone].points} | Sisa: Rp${db[phone].sisaUang}`;
         document.getElementById('btnSapa').style.display = 'flex';
         document.getElementById('amount').value = "";
     }
@@ -148,13 +138,9 @@
         if (!lastActiveUser) return;
         const pts = lastActiveUser.points;
         const sisa = lastActiveUser.sisaUang;
-        
         let infoPoin = pts >= 10 ? `\n🔥 *Hore!* Poin Kakak sudah bisa ditukar dengan menu favorit gratis!\n` : `\n`;
-        
         const katalog = `*Katalog Penukaran Poin:* \n🍹 10 Pts: Es Teh \n🥟 20 Pts: Dimsum \n🍲 25 Pts: Seblak Lengkap`;
-        
         const pesan = `Halo Kak ${lastActiveUser.name}! 👋\n\nTerima kasih sudah mampir ke *Seblak Salah*. 😊\n\nSaldo Poin: *${pts} Poin*\nTabungan Sisa: *Rp${sisa}*${infoPoin}\n${katalog}\n\nDitunggu kedatangannya lagi ya kak!`;
-        
         window.open(`https://wa.me/${lastActiveUser.phone.replace(/^0/, '62')}?text=${encodeURIComponent(pesan)}`, '_blank');
         document.getElementById('btnSapa').style.display = 'none';
     }
@@ -166,37 +152,31 @@
         listUltah.innerHTML = ""; listFollowUp.innerHTML = "";
         const today = new Date();
         const tomorrow = new Date(); tomorrow.setDate(today.getDate() + 1);
-
-        let countUltah = 0;
         for (let phone in db) {
             if (db[phone].dob) {
                 const bday = new Date(db[phone].dob);
                 const isToday = bday.getDate() === today.getDate() && bday.getMonth() === today.getMonth();
                 const isTomorrow = bday.getDate() === tomorrow.getDate() && bday.getMonth() === tomorrow.getMonth();
                 if (isToday || isTomorrow) {
-                    countUltah++;
-                    const row = document.createElement('div'); 
-                    row.className = 'item-row birthday-row';
-                    row.innerHTML = `<div class="info-text"><strong>${db[phone].name}</strong>Ultah: ${isToday ? "HARI INI! 🎂" : "Besok 🎁"}</div><button class="btn-mini-wa" onclick="kirimUltah('${phone}', '${db[phone].name}')">Traktir</button>`;
+                    const row = document.createElement('div'); row.className = 'item-row birthday-row';
+                    row.innerHTML = `<div class="info-text"><strong>${db[phone].name}</strong>Ultah: ${isToday ? "HARI INI!" : "Besok"}</div><button class="btn-mini-wa" onclick="kirimUltah('${phone}', '${db[phone].name}')">Traktir</button>`;
                     listUltah.appendChild(row);
                 }
             }
-            const lastVisitDate = new Date(db[phone].lastVisit);
-            if (!isNaN(lastVisitDate)) {
-                const diffDays = Math.ceil(Math.abs(today - lastVisitDate) / (1000 * 60 * 60 * 24));
+            const visitDate = db[phone].lastVisit ? new Date(db[phone].lastVisit) : null;
+            if (visitDate) {
+                const diffDays = Math.ceil(Math.abs(today - visitDate) / (1000 * 60 * 60 * 24));
                 if (diffDays >= 7) {
-                    const row = document.createElement('div'); 
-                    row.className = 'item-row follow-up';
+                    const row = document.createElement('div'); row.className = 'item-row follow-up';
                     row.innerHTML = `<div class="info-text"><strong>${db[phone].name}</strong>${diffDays} hari tidak mampir</div><button class="btn-mini-wa" onclick="kirimRindu('${phone}', '${db[phone].name}', ${db[phone].points}, ${diffDays})">Sapa</button>`;
                     listFollowUp.appendChild(row);
                 }
             }
         }
-        if (countUltah === 0) listUltah.innerHTML = '<p style="text-align: center; font-size: 0.8rem; color: #999;">Tidak ada yang ultah terdekat.</p>';
     }
 
     function kirimUltah(phone, nama) {
-        const pesan = `Halo Kak ${nama}! 👋\n\nSelamat Ulang Tahun! 🎂 Sebagai kado spesial, *Seblak Salah* mau *MENTRAKTIR* Kakak 1 Porsi SEBLAK LENGKAP gratis! 😍 Tunjukkan WA ini ke kasir ya. Khusus makan di tempat.`;
+        const pesan = `Halo Kak ${nama}! 👋\n\nKami dari *Seblak Salah* ingin mengucapkan *Selamat Ulang Tahun*! 🎂✨\n\nSemoga panjang umur, sehat selalu, dan dilancarkan rezekinya. Sebagai kado spesial, Seblak Salah mau *MENTRAKTIR* Kakak 1 Porsi SEBLAK LENGKAP gratis! 😍\n\nSyaratnya cukup tunjukkan WA ini dan kartu identitas ke kasir. Khusus makan di tempat ya Kak. Ditunggu kedatangannya! 🍲✨`;
         window.open(`https://wa.me/${phone.replace(/^0/, '62')}?text=${encodeURIComponent(pesan)}`, '_blank');
     }
 
@@ -213,12 +193,13 @@
         db[phone].points -= cost; 
         db[phone].lastVisit = new Date().toISOString();
         saveDb(db);
-        fetch(SPREADSHEET_URL, { 
-            method: 'POST', 
-            mode: 'no-cors', 
-            body: JSON.stringify({ phone, name: db[phone].name, points: db[phone].points, dob: db[phone].dob, amount: 0 }) 
-        });
-        alert("Redeem Berhasil!");
+        lastActiveUser = { phone, ...db[phone] };
+        fetch(SPREADSHEET_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ phone, name: db[phone].name, points: db[phone].points, dob: db[phone].dob, amount: 0 }) });
+        updateStatusUI(db[phone].points, db[phone].sisaUang);
+        const out = document.getElementById('output');
+        out.style.display = 'block'; out.style.background = '#fef2f2';
+        out.innerHTML = `🎁 <strong>Redeem Berhasil!</strong><br>Sisa Poin ${db[phone].name}: ${db[phone].points} Pts`;
+        document.getElementById('btnSapa').style.display = 'flex';
     }
     window.onload = refreshDashboards;
 </script>
