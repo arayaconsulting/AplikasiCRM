@@ -66,8 +66,8 @@
 </div>
 
 <script>
-    // URL Deployment Terbaru Bapak Ali Mahfud
-    const SPREADSHEET_URL = "https://script.google.com/macros/s/AKfycbxxN4m1LnHXV7wEZbvqGjm1EqYBA5gRClj_nSeVzHg2yZkvMaoSy9NqzZe40IvYFA8T/exec"; 
+    // URL Deployment terbaru Bapak Ali Mahfud
+    const SPREADSHEET_URL = "https://script.google.com/macros/s/AKfycbwY79j09tPZ0UI0chNPoAKkYVDqbkwcEGk43h4z6K0iFMas5F1LMu8eepIX-zzQ3X5L/exec"; 
     const STORAGE_KEY = 'seblaksalah_crm_v3';
     let lastActiveUser = null;
 
@@ -75,8 +75,9 @@
     function saveDb(data) { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); refreshDashboards(); }
 
     function updateStatusUI(pts, sisa) {
-        document.getElementById('statusCloud').innerHTML = `✅ Saldo: ${pts} Pts | Sisa: Rp${sisa}`;
-        document.getElementById('statusCloud').style.color = "#27ae60";
+        const el = document.getElementById('statusCloud');
+        el.innerHTML = `✅ Saldo: ${pts} Pts | Sisa: Rp${sisa}`;
+        el.style.color = "#27ae60";
     }
 
     async function cekDataCloud() {
@@ -89,10 +90,10 @@
             if (data && !data.error) {
                 document.getElementById('name').value = data.name || "";
                 
-                // KUNCI: Memastikan format tanggal yyyy-mm-dd agar iPad tidak bingung
+                // PENGUNCI TANGGAL: Memaksa iPad menampilkan tanggal murni tanpa geser
                 if (data.dob) {
-                    let cleanDate = data.dob.split('T')[0].split(' ')[0];
-                    document.getElementById('dob').value = cleanDate;
+                    let d = data.dob.toString().split('T')[0].split(' ')[0];
+                    document.getElementById('dob').value = d;
                 }
                 
                 let db = getDb();
@@ -115,10 +116,13 @@
 
         let db = getDb();
         let user = db[phone] || { points: 0, sisaUang: 0 };
-        let totalUang = (parseInt(user.sisaUang) || 0) + amount;
+        let currentPoints = parseInt(user.points) || 0;
+        let currentSisa = parseInt(user.sisaUang) || 0;
+
+        let totalUang = currentSisa + amount;
         let poinBaru = Math.floor(totalUang / 10000);
         
-        user.points = (parseInt(user.points) || 0) + poinBaru;
+        user.points = currentPoints + poinBaru;
         user.sisaUang = totalUang % 10000;
         user.name = name;
         user.dob = dob;
@@ -135,9 +139,12 @@
 
         lastActiveUser = { phone, ...user };
         updateStatusUI(user.points, user.sisaUang);
-        document.getElementById('output').style.display = 'block';
-        document.getElementById('output').style.background = '#f0fdf4';
-        document.getElementById('output').innerHTML = `✅ Berhasil Simpan! Poin: ${user.points}`;
+        
+        const out = document.getElementById('output');
+        out.style.display = 'block';
+        out.style.background = '#f0fdf4';
+        out.innerHTML = `✅ Berhasil Simpan! Poin: ${user.points} | Sisa: Rp${user.sisaUang}`;
+        
         document.getElementById('btnSapa').style.display = 'flex';
         document.getElementById('amount').value = "";
     }
@@ -145,7 +152,13 @@
     function sapaPelanggan() {
         if (!lastActiveUser) return;
         const pts = lastActiveUser.points;
-        const pesan = `Halo Kak ${lastActiveUser.name}! 👋\n\nTerima kasih sudah mampir ke *Seblak Salah*. 😊\n\nSaldo Poin: *${pts} Poin*\nTabungan Sisa: *Rp${lastActiveUser.sisaUang}*\n\nDitunggu kedatangannya lagi ya kak!`;
+        const sisa = lastActiveUser.sisaUang;
+        let infoPoin = pts >= 10 ? `\n🔥 *Hore!* Poin Kakak sudah bisa ditukar dengan menu favorit gratis!\n` : `\n`;
+        
+        const katalog = `*Katalog Penukaran Poin:* \n🍹 10 Pts: Es Teh \n🥟 20 Pts: Dimsum \n🍲 25 Pts: Seblak Lengkap`;
+        
+        const pesan = `Halo Kak ${lastActiveUser.name}! 👋\n\nTerima kasih sudah mampir ke *Seblak Salah*. 😊\n\nSaldo Poin: *${pts} Poin*\nTabungan Sisa: *Rp${sisa}*${infoPoin}\n${katalog}\n\nDitunggu kedatangannya lagi ya kak!`;
+        
         window.open(`https://wa.me/${lastActiveUser.phone.replace(/^0/, '62')}?text=${encodeURIComponent(pesan)}`, '_blank');
         document.getElementById('btnSapa').style.display = 'none';
     }
@@ -158,19 +171,25 @@
         const tDate = today.getDate();
         const tMonth = today.getMonth();
 
+        let count = 0;
         for (let p in db) {
             if (db[p].dob) {
                 const bDay = new Date(db[p].dob);
                 if (bDay.getDate() === tDate && bDay.getMonth() === tMonth) {
-                    list.innerHTML += `<div class="item-row birthday-row"><div class="info-text"><strong>${db[p].name}</strong>Ultah: HARI INI! 🎂</div><button class="btn-mini-wa" onclick="kirimUltah('${p}','${db[p].name}')">Traktir</button></div>`;
+                    count++;
+                    list.innerHTML += `<div class="item-row birthday-row">
+                        <div class="info-text"><strong>${db[p].name}</strong>Ultah: HARI INI! 🎂</div>
+                        <button class="btn-mini-wa" onclick="kirimUltah('${p}','${db[p].name}')">Traktir</button>
+                    </div>`;
                 }
             }
         }
+        if (count === 0) list.innerHTML = '<p style="text-align: center; font-size: 0.8rem; color: #999;">Tidak ada yang ultah terdekat.</p>';
     }
 
     function kirimUltah(phone, nama) {
-        const pesan = `Halo Kak ${nama}! 👋\n\nSelamat Ulang Tahun dari *Seblak Salah*! 🎂\nDapatkan 1 porsi Seblak Lengkap GRATIS dengan menunjukkan pesan ini.`;
-        window.open(`https://wa.me/${phone.replace(/^0/, '62')}?text=${encodeURIComponent(pesan)}`, '_blank');
+        const pesan = `Halo Kak ${nama}! 👋\n\nKami dari *Seblak Salah* ingin mengucapkan *Selamat Ulang Tahun*! 🎂✨\n\nSemoga panjang umur, sehat selalu, dan dilancarkan rezekinya. Sebagai kado spesial, Seblak Salah mau *MENTRAKTIR* Kakak 1 Porsi SEBLAK LENGKAP gratis! 😍\n\nSyaratnya cukup tunjukkan WA ini dan kartu identitas ke kasir. Khusus makan di tempat ya Kak. Ditunggu kedatangannya! 🍲✨`;
+        window.open(`https://wa.me/${phone.replace(/^0/, '62')}?text=${encodeURIComponent(pesan)}?text=${encodeURIComponent(pesan)}`, '_blank');
     }
 
     function redeemPoin() {
@@ -180,7 +199,9 @@
         if (!db[phone] || db[phone].points < cost) return alert("Poin kurang!");
         
         db[phone].points -= cost;
+        db[phone].lastVisit = new Date().toISOString();
         saveDb(db);
+        
         lastActiveUser = { phone, ...db[phone] };
         
         fetch(SPREADSHEET_URL, { 
@@ -190,9 +211,13 @@
         });
         
         updateStatusUI(db[phone].points, db[phone].sisaUang);
-        document.getElementById('output').style.display = 'block';
-        document.getElementById('output').style.background = '#fef2f2';
-        document.getElementById('output').innerHTML = `🎁 Redeem Berhasil! Sisa Poin: ${db[phone].points}`;
+        
+        const out = document.getElementById('output');
+        out.style.display = 'block';
+        out.style.background = '#fef2f2';
+        out.innerHTML = `🎁 Redeem Berhasil! Sisa Poin: ${db[phone].points}`;
+        document.getElementById('btnSapa').style.display = 'flex';
+        document.getElementById('dob').value = db[phone].dob;
     }
     window.onload = refreshDashboards;
 </script>
