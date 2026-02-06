@@ -9,7 +9,6 @@
         body { font-family: 'Segoe UI', Roboto, sans-serif; background: var(--bg); margin: 0; padding: 15px; color: #333; }
         .container { max-width: 500px; margin: auto; }
         .branding { text-align: center; margin-bottom: 25px; }
-        .branding img { max-width: 140px; height: auto; margin-bottom: 5px; }
         .branding h1 { font-size: 1.6rem; color: var(--primary); margin: 0; font-weight: 800; }
         .branding p { font-size: 0.8rem; color: #7f8c8d; margin: 2px 0; text-transform: uppercase; letter-spacing: 1px; }
         .card { background: var(--card); padding: 20px; border-radius: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); border: 1px solid #edf2f7; margin-bottom: 15px; }
@@ -22,27 +21,24 @@
         .btn-wa { background: var(--wa); color: white; display: none; }
         .btn-redeem { background: var(--secondary); color: white; }
         .item-row { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-radius: 15px; margin-bottom: 8px; border: 1px solid; }
-        .follow-up { background: #fff5eb; border-color: #ffe0b2; }
         .birthday-row { background: #eef7ff; border-color: #cde4f7; }
         .info-text { font-size: 0.8rem; }
         .info-text strong { display: block; font-size: 0.9rem; color: var(--secondary); }
         .btn-mini-wa { padding: 6px 12px; background: var(--wa); color: white; border: none; border-radius: 10px; font-weight: bold; font-size: 0.75rem; cursor: pointer; }
         .result-box { margin-top: 15px; padding: 15px; border-radius: 15px; display: none; font-size: 0.9rem; border-left: 5px solid; }
         .status-cloud { font-size: 0.65rem; color: #94a3b8; margin-top: -10px; margin-bottom: 10px; text-align: right; font-style: italic; }
-        .footer { text-align: center; margin-top: 30px; font-size: 0.7rem; color: #94a3b8; border-top: 1px solid #e2e8f0; padding-top: 15px; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div class="branding">
-        <img src="logo.png" alt="Araya Consulting">
         <h1>Seblak Salah</h1>
-        <p>LOYALTY PROGRAM MANAGEMENT</p>
+        <p>Loyalty Program Management</p>
     </div>
 
     <div class="card">
-        <div class="section-header" style="margin-top:0;">INPUT TRANSAKSI</div>
+        <div class="section-header" style="margin-top:0;">Input Transaksi</div>
         <input type="tel" id="phone" placeholder="Nomor WA (Contoh: 0812...)" onblur="cekDataCloud()">
         <div id="statusCloud" class="status-cloud"></div>
         <input type="text" id="name" placeholder="Nama Pelanggan">
@@ -51,9 +47,9 @@
         <input type="number" id="amount" placeholder="Nominal Belanja (Rp)">
         
         <button id="btnSave" class="btn btn-save" onclick="tambahPoin()">Simpan Transaksi</button>
-        <button id="btnSapa" class="btn btn-wa" style="display: none; background-color: var(--wa); color: white;" onclick="sapaPelanggan()">Kirim Sapaan (WA)</button>
+        <button id="btnSapa" class="btn btn-wa" onclick="sapaPelanggan()">Kirim Sapaan (WA)</button>
         
-        <div class="section-header">REDEEM REWARD</div>
+        <div class="section-header">Redeem Reward</div>
         <select id="reward">
             <option value="10">Es Teh Manis (10 Pts)</option>
             <option value="20">Dimsum (20 Pts)</option>
@@ -64,21 +60,14 @@
     </div>
 
     <div class="card">
-        <div class="section-header" style="color: var(--birthday);">🎂 PENGINGAT ULANG TAHUN (H-1)</div>
+        <div class="section-header" style="color: var(--birthday);">🎂 Pengingat Ulang Tahun</div>
         <div id="listUltah"></div>
     </div>
-
-    <div class="card">
-        <div class="section-header">🚪 DASHBOARD FOLLOW-UP (≥ 7 HARI)</div>
-        <div id="listFollowUp"></div>
-    </div>
-
-    <div class="footer">Developed by <strong>Araya Consulting</strong> &copy; 2026</div>
 </div>
 
 <script>
-    // URL Deployment terbaru Bapak Ali Mahfud
-    const SPREADSHEET_URL = "https://script.google.com/macros/s/AKfycbw9igPaZCPki6rR4l0FxUq0W5V9hfHe-AVhpWQNxAETunK-LwKzBb6sTFB42G6OgdNq/exec"; 
+    // URL Deployment Terbaru Bapak Ali Mahfud
+    const SPREADSHEET_URL = "https://script.google.com/macros/s/AKfycbxxN4m1LnHXV7wEZbvqGjm1EqYBA5gRClj_nSeVzHg2yZkvMaoSy9NqzZe40IvYFA8T/exec"; 
     const STORAGE_KEY = 'seblaksalah_crm_v3';
     let lastActiveUser = null;
 
@@ -86,66 +75,69 @@
     function saveDb(data) { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); refreshDashboards(); }
 
     function updateStatusUI(pts, sisa) {
-        const statusEl = document.getElementById('statusCloud');
-        statusEl.innerHTML = `✅ Saldo: ${pts} Pts | Sisa: Rp${sisa}`;
-        statusEl.style.color = "#27ae60";
+        document.getElementById('statusCloud').innerHTML = `✅ Saldo: ${pts} Pts | Sisa: Rp${sisa}`;
+        document.getElementById('statusCloud').style.color = "#27ae60";
     }
 
     async function cekDataCloud() {
         const phone = document.getElementById('phone').value;
         if (!phone) return;
-        const statusEl = document.getElementById('statusCloud');
-        statusEl.innerHTML = "Mengecek cloud...";
+        document.getElementById('statusCloud').innerHTML = "Mengecek cloud...";
         try {
             const response = await fetch(`${SPREADSHEET_URL}?phone=${phone}`);
             const data = await response.json();
             if (data && !data.error) {
                 document.getElementById('name').value = data.name || "";
                 
-                // PERBAIKAN PERMANEN: Menampilkan tanggal lahir mentah (yyyy-mm-dd) 
-                // supaya iPad tidak menggeser hari karena zona waktu.
+                // KUNCI: Memastikan format tanggal yyyy-mm-dd agar iPad tidak bingung
                 if (data.dob) {
-                    let cleanDate = data.dob;
-                    if (cleanDate.includes("T")) cleanDate = cleanDate.split("T")[0];
+                    let cleanDate = data.dob.split('T')[0].split(' ')[0];
                     document.getElementById('dob').value = cleanDate;
                 }
-
+                
                 let db = getDb();
-                db[phone] = { name: data.name, points: data.points, lastVisit: data.lastVisit, dob: data.dob, sisaUang: data.sisaUang || 0 };
+                db[phone] = { ...data };
                 saveDb(db);
                 updateStatusUI(data.points, data.sisaUang);
-            } else { 
-                statusEl.innerHTML = "ℹ️ Pelanggan Baru"; 
-                statusEl.style.color = "#e67e22";
-                document.getElementById('name').value = "";
-                document.getElementById('dob').value = "";
+            } else {
+                document.getElementById('statusCloud').innerHTML = "ℹ️ Pelanggan Baru";
+                document.getElementById('statusCloud').style.color = "#e67e22";
             }
-        } catch (e) { statusEl.innerHTML = "⚠️ Cloud error."; }
+        } catch (e) { console.error(e); }
     }
 
     function tambahPoin() {
         const phone = document.getElementById('phone').value;
-        const nameInput = document.getElementById('name').value;
-        const dobInput = document.getElementById('dob').value;
+        const name = document.getElementById('name').value;
+        const dob = document.getElementById('dob').value;
         const amount = parseInt(document.getElementById('amount').value || 0);
         if (!phone) return alert("Isi nomor WA!");
+
         let db = getDb();
-        const now = new Date().toISOString();
-        let currentSisa = db[phone] ? (parseInt(db[phone].sisaUang) || 0) : 0;
-        let totalUang = currentSisa + amount;
+        let user = db[phone] || { points: 0, sisaUang: 0 };
+        let totalUang = (parseInt(user.sisaUang) || 0) + amount;
         let poinBaru = Math.floor(totalUang / 10000);
-        let sisaBaru = totalUang % 10000;
-        if (db[phone]) {
-            db[phone].points += poinBaru; db[phone].sisaUang = sisaBaru; db[phone].lastVisit = now;
-            if(nameInput) db[phone].name = nameInput; if(dobInput) db[phone].dob = dobInput;
-        } else { db[phone] = { name: nameInput || "Pelanggan", points: poinBaru, lastVisit: now, dob: dobInput || "", sisaUang: sisaBaru }; }
+        
+        user.points = (parseInt(user.points) || 0) + poinBaru;
+        user.sisaUang = totalUang % 10000;
+        user.name = name;
+        user.dob = dob;
+        user.lastVisit = new Date().toISOString();
+        
+        db[phone] = user;
         saveDb(db);
-        fetch(SPREADSHEET_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ phone, name: db[phone].name, points: db[phone].points, dob: db[phone].dob, amount }) });
-        lastActiveUser = { phone, ...db[phone] };
-        updateStatusUI(db[phone].points, db[phone].sisaUang);
-        const out = document.getElementById('output');
-        out.style.display = 'block'; out.style.background = '#f0fdf4';
-        out.innerHTML = `✅ <strong>Berhasil!</strong><br>Poin: ${db[phone].points} | Sisa: Rp${db[phone].sisaUang}`;
+
+        fetch(SPREADSHEET_URL, { 
+            method: 'POST', 
+            mode: 'no-cors', 
+            body: JSON.stringify({ phone, name, points: user.points, dob, amount }) 
+        });
+
+        lastActiveUser = { phone, ...user };
+        updateStatusUI(user.points, user.sisaUang);
+        document.getElementById('output').style.display = 'block';
+        document.getElementById('output').style.background = '#f0fdf4';
+        document.getElementById('output').innerHTML = `✅ Berhasil Simpan! Poin: ${user.points}`;
         document.getElementById('btnSapa').style.display = 'flex';
         document.getElementById('amount').value = "";
     }
@@ -153,54 +145,31 @@
     function sapaPelanggan() {
         if (!lastActiveUser) return;
         const pts = lastActiveUser.points;
-        const sisa = lastActiveUser.sisaUang;
-        let infoPoin = pts >= 10 ? `\n🔥 *Hore!* Poin Kakak sudah bisa ditukar dengan menu favorit gratis!\n` : `\n`;
-        const katalog = `*Katalog Penukaran Poin:* \n🍹 10 Pts: Es Teh \n🥟 20 Pts: Dimsum \n🍲 25 Pts: Seblak Lengkap`;
-        const pesan = `Halo Kak ${lastActiveUser.name}! 👋\n\nTerima kasih sudah mampir ke *Seblak Salah*. 😊\n\nSaldo Poin: *${pts} Poin*\nTabungan Sisa: *Rp${sisa}*${infoPoin}\n${katalog}\n\nDitunggu kedatangannya lagi ya kak!`;
+        const pesan = `Halo Kak ${lastActiveUser.name}! 👋\n\nTerima kasih sudah mampir ke *Seblak Salah*. 😊\n\nSaldo Poin: *${pts} Poin*\nTabungan Sisa: *Rp${lastActiveUser.sisaUang}*\n\nDitunggu kedatangannya lagi ya kak!`;
         window.open(`https://wa.me/${lastActiveUser.phone.replace(/^0/, '62')}?text=${encodeURIComponent(pesan)}`, '_blank');
         document.getElementById('btnSapa').style.display = 'none';
     }
 
     function refreshDashboards() {
         const db = getDb();
-        const listUltah = document.getElementById('listUltah');
-        const listFollowUp = document.getElementById('listFollowUp');
-        listUltah.innerHTML = ""; listFollowUp.innerHTML = "";
+        const list = document.getElementById('listUltah');
+        list.innerHTML = "";
         const today = new Date();
-        const tomorrow = new Date(); tomorrow.setDate(today.getDate() + 1);
-        let countUltah = 0;
-        for (let phone in db) {
-            if (db[phone].dob) {
-                const bday = new Date(db[phone].dob);
-                const isToday = bday.getDate() === today.getDate() && bday.getMonth() === today.getMonth();
-                const isTomorrow = bday.getDate() === tomorrow.getDate() && bday.getMonth() === tomorrow.getMonth();
-                if (isToday || isTomorrow) {
-                    countUltah++;
-                    const row = document.createElement('div'); row.className = 'item-row birthday-row';
-                    row.innerHTML = `<div class="info-text"><strong>${db[phone].name}</strong>Ultah: ${isToday ? "HARI INI!" : "Besok"}</div><button class="btn-mini-wa" onclick="kirimUltah('${phone}', '${db[phone].name}')">Traktir</button>`;
-                    listUltah.appendChild(row);
-                }
-            }
-            const visitDate = db[phone].lastVisit ? new Date(db[phone].lastVisit) : null;
-            if (visitDate) {
-                const diffDays = Math.ceil(Math.abs(today - visitDate) / (1000 * 60 * 60 * 24));
-                if (diffDays >= 7) {
-                    const row = document.createElement('div'); row.className = 'item-row follow-up';
-                    row.innerHTML = `<div class="info-text"><strong>${db[phone].name}</strong>${diffDays} hari tidak mampir</div><button class="btn-mini-wa" onclick="kirimRindu('${phone}', '${db[phone].name}', ${db[phone].points}, ${diffDays})">Sapa</button>`;
-                    listFollowUp.appendChild(row);
+        const tDate = today.getDate();
+        const tMonth = today.getMonth();
+
+        for (let p in db) {
+            if (db[p].dob) {
+                const bDay = new Date(db[p].dob);
+                if (bDay.getDate() === tDate && bDay.getMonth() === tMonth) {
+                    list.innerHTML += `<div class="item-row birthday-row"><div class="info-text"><strong>${db[p].name}</strong>Ultah: HARI INI! 🎂</div><button class="btn-mini-wa" onclick="kirimUltah('${p}','${db[p].name}')">Traktir</button></div>`;
                 }
             }
         }
-        if (countUltah === 0) listUltah.innerHTML = '<p style="text-align: center; font-size: 0.8rem; color: #999;">Tidak ada yang ultah terdekat.</p>';
     }
 
     function kirimUltah(phone, nama) {
-        const pesan = `Halo Kak ${nama}! 👋\n\nKami dari *Seblak Salah* ingin mengucapkan *Selamat Ulang Tahun*! 🎂✨\n\nSemoga panjang umur, sehat selalu, dan dilancarkan rezekinya. Sebagai kado spesial, Seblak Salah mau *MENTRAKTIR* Kakak 1 Porsi SEBLAK LENGKAP gratis! 😍\n\nSyaratnya cukup tunjukkan WA ini dan kartu identitas ke kasir. Khusus makan di tempat ya Kak. Ditunggu kedatangannya! 🍲✨`;
-        window.open(`https://wa.me/${phone.replace(/^0/, '62')}?text=${encodeURIComponent(pesan)}`, '_blank');
-    }
-
-    function kirimRindu(phone, nama, poin, hari) {
-        const pesan = `Selamat Siang Kak ${nama}, kangen nih dari *Seblak Salah*! ✨ Sudah ${hari} hari Kakak tidak mampir. Saldo Poin: *${poin}*. Yuk mampir!`;
+        const pesan = `Halo Kak ${nama}! 👋\n\nSelamat Ulang Tahun dari *Seblak Salah*! 🎂\nDapatkan 1 porsi Seblak Lengkap GRATIS dengan menunjukkan pesan ini.`;
         window.open(`https://wa.me/${phone.replace(/^0/, '62')}?text=${encodeURIComponent(pesan)}`, '_blank');
     }
 
@@ -209,19 +178,21 @@
         const cost = parseInt(document.getElementById('reward').value);
         let db = getDb();
         if (!db[phone] || db[phone].points < cost) return alert("Poin kurang!");
-        db[phone].points -= cost; 
-        db[phone].lastVisit = new Date().toISOString();
+        
+        db[phone].points -= cost;
         saveDb(db);
         lastActiveUser = { phone, ...db[phone] };
-        fetch(SPREADSHEET_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ phone, name: db[phone].name, points: db[phone].points, dob: db[phone].dob, amount: 0 }) });
-        updateStatusUI(db[phone].points, db[phone].sisaUang);
-        const out = document.getElementById('output');
-        out.style.display = 'block'; out.style.background = '#fef2f2';
-        out.innerHTML = `🎁 <strong>Redeem Berhasil!</strong><br>Sisa Saldo ${db[phone].name}: ${db[phone].points} Pts`;
-        document.getElementById('btnSapa').style.display = 'flex';
         
-        // Memastikan tanggal lahir tetap ada setelah redeem
-        document.getElementById('dob').value = db[phone].dob;
+        fetch(SPREADSHEET_URL, { 
+            method: 'POST', 
+            mode: 'no-cors', 
+            body: JSON.stringify({ phone, name: db[phone].name, points: db[phone].points, dob: db[phone].dob, amount: 0 }) 
+        });
+        
+        updateStatusUI(db[phone].points, db[phone].sisaUang);
+        document.getElementById('output').style.display = 'block';
+        document.getElementById('output').style.background = '#fef2f2';
+        document.getElementById('output').innerHTML = `🎁 Redeem Berhasil! Sisa Poin: ${db[phone].points}`;
     }
     window.onload = refreshDashboards;
 </script>
