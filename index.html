@@ -77,7 +77,6 @@
 </div>
 
 <script>
-    // URL Deployment Bapak Ali Mahfud
     const SPREADSHEET_URL = "https://script.google.com/macros/s/AKfycbwY79j09tPZ0UI0chNPoAKkYVDqbkwcEGk43h4z6K0iFMas5F1LMu8eepIX-zzQ3X5L/exec"; 
     const STORAGE_KEY = 'seblaksalah_crm_v3';
     let lastActiveUser = null;
@@ -183,8 +182,17 @@
         window.open(`https://wa.me/${phone.replace(/^0/, '62')}?text=${encodeURIComponent(pesan)}`, '_blank');
     }
 
+    function getSapaanWaktu() {
+        const jam = new Date().getHours();
+        if (jam < 11) return "Selamat Pagi";
+        if (jam < 15) return "Selamat Siang";
+        if (jam < 18) return "Selamat Sore";
+        return "Selamat Malam";
+    }
+
     function kirimRindu(phone, nama, poin, hari) {
-        const pesan = `Selamat Siang Kak ${nama}, kangen nih dari *Seblak Salah*! ✨ Sudah ${hari} hari Kakak tidak mampir. Saldo Poin: *${poin}*. Yuk mampir!`;
+        const sapaanWaktu = getSapaanWaktu();
+        const pesan = `${sapaanWaktu}, apa kabarnya Kak ${nama}? 👋\n\nSemoga Kakak sehat dan bahagia selalu ya. Di *Seblak Salah*, kami tiba-tiba teringat Kakak karena sudah ${hari} hari Kakak tidak mampir ke sini. ✨\n\nRasanya ada yang kurang kalau meja favorit Kakak kosong terlalu lama. Oh iya, Kakak masih punya tabungan *${poin} Poin* loh, sayang banget kalau tidak dimanfaatkan. 😊\n\nYuk, sempatkan mampir lagi. Kami tunggu ya Kak untuk melepas rindu dengan aroma kencur dan pedas khas Seblak Salah! 🍲✨`;
         window.open(`https://wa.me/${phone.replace(/^0/, '62')}?text=${encodeURIComponent(pesan)}`, '_blank');
     }
 
@@ -195,7 +203,6 @@
         if (!db[phone] || db[phone].points < cost) return alert("Poin kurang!");
         db[phone].points -= cost; db[phone].lastVisit = new Date().toISOString();
         saveDb(db);
-        // UPDATE UI INSTAN
         updateStatusUI(db[phone].points, db[phone].sisaUang);
         lastActiveUser = { phone, ...db[phone] };
         fetch(SPREADSHEET_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ phone, name: db[phone].name, points: db[phone].points, dob: db[phone].dob, amount: 0 }) });
