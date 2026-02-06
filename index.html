@@ -9,7 +9,6 @@
         body { font-family: 'Segoe UI', Roboto, sans-serif; background: var(--bg); margin: 0; padding: 15px; color: #333; }
         .container { max-width: 500px; margin: auto; }
         .branding { text-align: center; margin-bottom: 25px; }
-        /* Perbaikan CSS Logo agar muncul proporsional */
         .branding img { width: 150px; height: auto; margin-bottom: 5px; display: block; margin-left: auto; margin-right: auto; }
         .branding h1 { font-size: 1.6rem; color: var(--primary); margin: 0; font-weight: 800; }
         .branding p { font-size: 0.8rem; color: #7f8c8d; margin: 2px 0; text-transform: uppercase; letter-spacing: 1px; }
@@ -78,6 +77,7 @@
 </div>
 
 <script>
+    // URL Deployment Bapak Ali Mahfud
     const SPREADSHEET_URL = "https://script.google.com/macros/s/AKfycbwY79j09tPZ0UI0chNPoAKkYVDqbkwcEGk43h4z6K0iFMas5F1LMu8eepIX-zzQ3X5L/exec"; 
     const STORAGE_KEY = 'seblaksalah_crm_v3';
     let lastActiveUser = null;
@@ -129,6 +129,7 @@
         saveDb(db);
         fetch(SPREADSHEET_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ phone, name: db[phone].name, points: db[phone].points, dob: db[phone].dob, amount }) });
         lastActiveUser = { phone, ...db[phone] };
+        updateStatusUI(db[phone].points, db[phone].sisaUang);
         const out = document.getElementById('output');
         out.style.display = 'block'; out.style.background = '#f0fdf4';
         out.innerHTML = `✅ <strong>Berhasil!</strong><br>Poin: ${db[phone].points} | Tabungan Sisa: Rp${db[phone].sisaUang}`;
@@ -154,39 +155,27 @@
         listUltah.innerHTML = ""; listFollowUp.innerHTML = "";
         const today = new Date();
         const tomorrow = new Date(); tomorrow.setDate(today.getDate() + 1);
-
-        let countUltah = 0;
-        let countFollow = 0;
-
         for (let phone in db) {
-            // LOGIKA ULANG TAHUN (H-1)
             if (db[phone].dob) {
                 const bday = new Date(db[phone].dob);
                 const isToday = bday.getDate() === today.getDate() && bday.getMonth() === today.getMonth();
                 const isTomorrow = bday.getDate() === tomorrow.getDate() && bday.getMonth() === tomorrow.getMonth();
                 if (isToday || isTomorrow) {
-                    countUltah++;
                     const row = document.createElement('div'); row.className = 'item-row birthday-row';
                     row.innerHTML = `<div class="info-text"><strong>${db[phone].name}</strong>Ultah: ${isToday ? "HARI INI!" : "Besok"}</div><button class="btn-mini-wa" onclick="kirimUltah('${phone}', '${db[phone].name}')">Traktir</button>`;
                     listUltah.appendChild(row);
                 }
             }
-            
-            // LOGIKA FOLLOW UP (Ubah ke 10 Hari)
             const visitDate = db[phone].lastVisit ? new Date(db[phone].lastVisit) : null;
             if (visitDate) {
-                const diffTime = Math.abs(today - visitDate);
-                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                const diffDays = Math.ceil(Math.abs(today - visitDate) / (1000 * 60 * 60 * 24));
                 if (diffDays >= 10) {
-                    countFollow++;
                     const row = document.createElement('div'); row.className = 'item-row follow-up';
                     row.innerHTML = `<div class="info-text"><strong>${db[phone].name}</strong>${diffDays} hari tidak mampir</div><button class="btn-mini-wa" onclick="kirimRindu('${phone}', '${db[phone].name}', ${db[phone].points}, ${diffDays})">Sapa</button>`;
                     listFollowUp.appendChild(row);
                 }
             }
         }
-        if (countUltah === 0) listUltah.innerHTML = '<p style="text-align: center; font-size: 0.8rem; color: #999;">Tidak ada yang ultah terdekat.</p>';
-        if (countFollow === 0) listFollowUp.innerHTML = '<p style="text-align: center; font-size: 0.8rem; color: #999;">Semua pelanggan rajin mampir.</p>';
     }
 
     function kirimUltah(phone, nama) {
@@ -206,8 +195,14 @@
         if (!db[phone] || db[phone].points < cost) return alert("Poin kurang!");
         db[phone].points -= cost; db[phone].lastVisit = new Date().toISOString();
         saveDb(db);
+        // UPDATE UI INSTAN
+        updateStatusUI(db[phone].points, db[phone].sisaUang);
+        lastActiveUser = { phone, ...db[phone] };
         fetch(SPREADSHEET_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ phone, name: db[phone].name, points: db[phone].points, dob: db[phone].dob, amount: 0 }) });
-        alert("Redeem Berhasil!");
+        const out = document.getElementById('output');
+        out.style.display = 'block'; out.style.background = '#fef2f2';
+        out.innerHTML = `🎁 <strong>Redeem Berhasil!</strong><br>Sisa Poin: ${db[phone].points}`;
+        document.getElementById('btnSapa').style.display = 'flex';
     }
     window.onload = refreshDashboards;
 </script>
