@@ -9,7 +9,6 @@
         body { font-family: 'Segoe UI', Roboto, sans-serif; background: var(--bg); margin: 0; padding: 15px; color: #333; }
         .container { max-width: 500px; margin: auto; }
         .branding { text-align: center; margin-bottom: 25px; }
-        .branding img { width: 150px; height: auto; margin-bottom: 5px; display: block; margin-left: auto; margin-right: auto; }
         .branding h1 { font-size: 1.6rem; color: var(--primary); margin: 0; font-weight: 800; }
         .card { background: var(--card); padding: 20px; border-radius: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); border: 1px solid #edf2f7; margin-bottom: 15px; }
         .section-header { font-size: 0.7rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin: 20px 0 10px 0; display: flex; align-items: center; letter-spacing: 0.5px; }
@@ -21,23 +20,21 @@
         .btn-wa { background: var(--wa); color: white; display: none; }
         .btn-redeem { background: var(--secondary); color: white; }
         .item-row { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-radius: 15px; margin-bottom: 8px; border: 1px solid; }
-        .follow-up { background: #fff5eb; border-color: #ffe0b2; }
         .birthday-row { background: #eef7ff; border-color: #cde4f7; }
         .info-text { font-size: 0.8rem; }
         .info-text strong { display: block; font-size: 0.9rem; color: var(--secondary); }
         .btn-mini-wa { padding: 6px 12px; background: var(--wa); color: white; border: none; border-radius: 10px; font-weight: bold; font-size: 0.75rem; cursor: pointer; }
-        .result-box { margin-top: 15px; padding: 15px; border-radius: 15px; display: none; font-size: 0.9rem; border-left: 5px solid; }
         .status-cloud { font-size: 0.65rem; color: #94a3b8; margin-top: -10px; margin-bottom: 10px; text-align: right; font-style: italic; }
         #branch { border: 2px solid var(--primary); background: #fffcf9; color: var(--primary); font-weight: 800; }
+        #output { display:none; padding:15px; border-radius:15px; margin-top:10px; font-size:0.9rem; border-left: 5px solid var(--success); background: #f0fdf4; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div class="branding">
-        <img src="logo.png" alt="Araya Consulting">
-        <h1>Seblak Salah</h1>
-        <p>LOYALTY PROGRAM MANAGEMENT</p>
+        <h1 style="margin-top:10px;">Seblak Salah</h1>
+        <p style="font-size:0.8rem; color:#666;">LOYALTY PROGRAM</p>
     </div>
 
     <div class="card">
@@ -58,7 +55,7 @@
         <input type="number" id="amount" placeholder="Nominal Belanja (Rp)">
         
         <button id="btnSave" class="btn btn-save" onclick="tambahPoin()">Simpan Transaksi</button>
-        <button id="btnSapa" class="btn btn-wa" style="display: none; background-color: var(--wa); color: white;" onclick="sapaPelanggan()">Kirim Sapaan (WA)</button>
+        <button id="btnSapa" class="btn btn-wa" onclick="sapaPelanggan()">Kirim Sapaan (WA)</button>
         
         <div class="section-header">REDEEM REWARD</div>
         <select id="reward">
@@ -67,33 +64,22 @@
             <option value="25">Seblak Lengkap (25 Pts)</option>
         </select>
         <button class="btn btn-redeem" onclick="redeemPoin()">Tukarkan Poin</button>
-        <div id="output" class="result-box"></div>
+        <div id="output"></div>
     </div>
 
     <div class="card">
-        <div class="section-header" style="color: var(--birthday);">🎂 PENGINGAT ULANG TAHUN (H-1)</div>
+        <div class="section-header" style="color: var(--birthday);">🎂 PENGINGAT ULANG TAHUN (H-1 & Hari H)</div>
         <div id="listUltah"></div>
-    </div>
-
-    <div class="card">
-        <div class="section-header">🚪 DASHBOARD FOLLOW-UP (≥ 10 HARI)</div>
-        <div id="listFollowUp"></div>
     </div>
 </div>
 
 <script>
-    const SPREADSHEET_URL = "https://script.google.com/macros/s/AKfycbykPg33CZ1Zk8yUPViaD45E7UVYxU-f4z4Wn7kuHzt6X3Cg7AETlXaUO99ggoxWefVS/exec"; 
+    const SPREADSHEET_URL = "https://script.google.com/macros/s/AKfycbysMzhFXx2YQshHygrhNYZAjp5mkntJhPSnnHTjZZswG1zRmyBMmQx-8v0Cx9AVdxyQ/exec"; 
     const STORAGE_KEY = 'seblaksalah_crm_v3';
     let lastActiveUser = null;
 
     function getDb() { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
     function saveDb(data) { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); refreshDashboards(); }
-
-    function updateStatusUI(pts, sisa) {
-        const el = document.getElementById('statusCloud');
-        el.innerHTML = `✅ Saldo: ${pts} Pts | Sisa: Rp${sisa}`;
-        el.style.color = "#27ae60";
-    }
 
     async function cekDataCloud() {
         const phone = document.getElementById('phone').value;
@@ -105,20 +91,21 @@
             if (data && !data.error) {
                 document.getElementById('name').value = data.name || "";
                 if (data.dob) {
-                    let d = data.dob.split('T')[0].split(' ')[0];
-                    document.getElementById('dob').value = d;
+                    // Membersihkan format tanggal agar sesuai input date
+                    let cleanDate = data.dob.split('T')[0];
+                    document.getElementById('dob').value = cleanDate;
                 }
                 let db = getDb();
                 db[phone] = { ...data };
                 saveDb(db);
-                updateStatusUI(data.points, data.sisaUang);
+                document.getElementById('statusCloud').innerHTML = `✅ Saldo: ${data.points} Pts | Sisa: Rp${data.sisaUang || 0}`;
+                document.getElementById('statusCloud').style.color = "#27ae60";
             } else {
                 document.getElementById('statusCloud').innerHTML = "ℹ️ Pelanggan Baru";
                 document.getElementById('statusCloud').style.color = "#e67e22";
             }
         } catch (e) { 
-            console.error(e); 
-            document.getElementById('statusCloud').innerHTML = "⚠️ Gagal ambil data.";
+            document.getElementById('statusCloud').innerHTML = "⚠️ Cloud tidak terjangkau.";
         }
     }
 
@@ -156,11 +143,11 @@
         });
 
         lastActiveUser = { phone, ...user };
-        updateStatusUI(user.points, user.sisaUang);
+        document.getElementById('statusCloud').innerHTML = `✅ Saldo: ${user.points} Pts | Sisa: Rp${user.sisaUang}`;
         
         const out = document.getElementById('output');
-        out.style.display = 'block'; out.style.background = '#f0fdf4';
-        out.innerHTML = `✅ <strong>Simpan Berhasil!</strong><br>Poin: ${user.points} | Cabang: ${branch}`;
+        out.style.display = 'block';
+        out.innerHTML = `✅ <strong>Berhasil Disimpan!</strong><br>Poin saat ini: ${user.points}<br><small>Lokasi: ${branch}</small>`;
         document.getElementById('btnSapa').style.display = 'flex';
         document.getElementById('amount').value = "";
     }
@@ -168,23 +155,21 @@
     function sapaPelanggan() {
         if (!lastActiveUser) return;
         const pts = lastActiveUser.points;
-        const pesan = `Halo Kak ${lastActiveUser.name}! 👋\nTerima kasih sudah mampir ke *Seblak Salah*. Saldo Poin Kakak: *${pts} Poin*. Ditunggu kedatangannya lagi ya kak!`;
+        const pesan = `Halo Kak ${lastActiveUser.name}! 👋\nTerima kasih sudah mampir ke *Seblak Salah*. Saldo Poin Kakak sekarang: *${pts} Poin*. Ditunggu kedatangannya lagi ya kak! 🍲✨`;
         window.open(`https://wa.me/${lastActiveUser.phone.replace(/^0/, '62')}?text=${encodeURIComponent(pesan)}`, '_blank');
         document.getElementById('btnSapa').style.display = 'none';
     }
 
     function refreshDashboards() {
         const db = getDb();
-        const listUltah = document.getElementById('listUltah');
-        const listFollowUp = document.getElementById('listFollowUp');
-        listUltah.innerHTML = ""; listFollowUp.innerHTML = "";
+        const list = document.getElementById('listUltah');
+        list.innerHTML = "";
         
         const today = new Date();
         const tomorrow = new Date();
         tomorrow.setDate(today.getDate() + 1);
 
         for (let phone in db) {
-            // Dashboard Ultah H-1 dan Hari H
             if (db[phone].dob) {
                 const bday = new Date(db[phone].dob);
                 const isToday = bday.getDate() === today.getDate() && bday.getMonth() === today.getMonth();
@@ -193,32 +178,16 @@
                 if (isToday || isTomorrow) {
                     const row = document.createElement('div');
                     row.className = 'item-row birthday-row';
-                    row.innerHTML = `<div class="info-text"><strong>${db[phone].name}</strong>Ultah: ${isToday ? "HARI INI!" : "BESOK"} 🎂</div><button class="btn-mini-wa" onclick="kirimUltah('${phone}', '${db[phone].name}')">Traktir</button>`;
-                    listUltah.appendChild(row);
-                }
-            }
-            // Dashboard Follow Up (10 Hari)
-            if (db[phone].lastVisit) {
-                const diffDays = Math.ceil(Math.abs(today - new Date(db[phone].lastVisit)) / (1000 * 60 * 60 * 24));
-                if (diffDays >= 10) {
-                    const row = document.createElement('div');
-                    row.className = 'item-row follow-up';
-                    row.innerHTML = `<div class="info-text"><strong>${db[phone].name}</strong>(${diffDays} hari tidak mampir)</div><button class="btn-mini-wa" onclick="kirimRindu('${phone}', '${db[phone].name}', ${db[phone].points}, ${diffDays})">Sapa</button>`;
-                    listFollowUp.appendChild(row);
+                    row.innerHTML = `<div class="info-text"><strong>${db[phone].name}</strong>Ultah: ${isToday ? "HARI INI!" : "BESOK"} 🎂</div>
+                    <button class="btn-mini-wa" onclick="kirimUltah('${phone}', '${db[phone].name}')">Traktir</button>`;
+                    list.appendChild(row);
                 }
             }
         }
     }
 
     function kirimUltah(phone, nama) {
-        const pesan = `Halo Kak ${nama}! 👋\n\nKami dari *Seblak Salah* ingin mengucapkan *Selamat Ulang Tahun*! 🎂✨\n\nSemoga panjang umur, sehat selalu, dan dilancarkan rezekinya. Sebagai kado spesial, Seblak Salah mau *MENTRAKTIR* Kakak 1 Porsi SEBLAK LENGKAP gratis! 😍\n\nSyaratnya cukup tunjukkan WA ini dan kartu identitas ke kasir. Khusus makan di tempat ya Kak. Ditunggu kedatangannya! 🍲✨`;
-        window.open(`https://wa.me/${phone.replace(/^0/, '62')}?text=${encodeURIComponent(pesan)}`, '_blank');
-    }
-
-    function kirimRindu(phone, nama, poin, hari) {
-        const jam = new Date().getHours();
-        let sapaan = jam < 11 ? "Selamat Pagi" : jam < 15 ? "Selamat Siang" : jam < 18 ? "Selamat Sore" : "Selamat Malam";
-        const pesan = `${sapaan}, apa kabarnya Kak ${nama}? 👋\n\nSemoga Kakak sehat dan bahagia selalu ya. Di *Seblak Salah*, kami tiba-tiba teringat Kakak karena sudah ${hari} hari Kakak tidak mampir ke sini. ✨\n\nRasanya ada yang kurang kalau meja favorit Kakak kosong terlalu lama. Oh iya, Kakak masih punya tabungan *${poin} Poin* loh, sayang banget kalau tidak dimanfaatkan. 😊\n\nYuk, sempatkan mampir lagi. Kami tunggu ya Kak untuk melepas rindu dengan aroma kencur dan pedas khas Seblak Salah! 🍲✨`;
+        const pesan = `Halo Kak ${nama}! 👋\n\nKami dari *Seblak Salah* ingin mengucapkan *Selamat Ulang Tahun*! 🎂✨\n\nKhusus buat Kakak, kami mau *MENTRAKTIR* 1 Porsi SEBLAK LENGKAP gratis! 😍\n\nSilakan datang ke outlet kami dan tunjukkan pesan ini ya. Selamat merayakan hari spesialmu! 🍲✨`;
         window.open(`https://wa.me/${phone.replace(/^0/, '62')}?text=${encodeURIComponent(pesan)}`, '_blank');
     }
 
@@ -227,11 +196,11 @@
         const cost = parseInt(document.getElementById('reward').value);
         const branch = document.getElementById('branch').value;
         let db = getDb();
-        if (!db[phone] || db[phone].points < cost) return alert("Poin kurang!");
+        if (!db[phone] || db[phone].points < cost) return alert("Poin tidak cukup!");
         
         db[phone].points -= cost; 
         saveDb(db);
-        updateStatusUI(db[phone].points, db[phone].sisaUang);
+        document.getElementById('statusCloud').innerHTML = `✅ Saldo: ${db[phone].points} Pts | Sisa: Rp${db[phone].sisaUang}`;
         
         fetch(SPREADSHEET_URL, { 
             method: 'POST', 
@@ -240,8 +209,10 @@
         });
         
         const out = document.getElementById('output');
-        out.style.display = 'block'; out.style.background = '#fef2f2';
-        out.innerHTML = `🎁 <strong>Redeem Berhasil!</strong><br>Sisa: ${db[phone].points} Pts | Lokasi: ${branch}`;
+        out.style.display = 'block';
+        out.style.background = '#fef2f2';
+        out.style.borderColor = '#ef4444';
+        out.innerHTML = `🎁 <strong>Redeem Berhasil!</strong><br>Sisa Poin: ${db[phone].points}<br><small>Outlet: ${branch}</small>`;
     }
     window.onload = refreshDashboards;
 </script>
