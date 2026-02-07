@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CRM Seblak Salah - Powered by Araya Consulting</title>
+    <title>CRM Seblak Salah - Multibranch System</title>
     <style>
         :root { --primary: #e67e22; --secondary: #2c3e50; --success: #27ae60; --wa: #25d366; --birthday: #3498db; --bg: #f4f7f6; --card: #ffffff; }
         body { font-family: 'Segoe UI', Roboto, sans-serif; background: var(--bg); margin: 0; padding: 15px; color: #333; }
@@ -16,7 +16,7 @@
         .section-header { font-size: 0.7rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin: 20px 0 10px 0; display: flex; align-items: center; letter-spacing: 0.5px; }
         .section-header::after { content: ""; flex: 1; height: 1px; background: #e2e8f0; margin-left: 10px; }
         label { font-size: 0.7rem; font-weight: 600; display: block; margin-bottom: 4px; color: #475569; }
-        input, select { width: 100%; padding: 12px; margin-bottom: 12px; border: 2px solid #f1f5f9; border-radius: 12px; box-sizing: border-box; font-size: 0.95rem; background: #f8fafc; }
+        input, select { width: 100%; padding: 12px; margin-bottom: 12px; border: 2px solid #f1f5f9; border-radius: 12px; box-sizing: border-box; font-size: 0.95rem; background: #f8fafc; font-weight: 500; }
         .btn { width: 100%; padding: 14px; border: none; border-radius: 14px; font-weight: 700; cursor: pointer; font-size: 0.95rem; transition: 0.3s; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 8px; }
         .btn-save { background: var(--success); color: white; }
         .btn-wa { background: var(--wa); color: white; display: none; }
@@ -30,6 +30,7 @@
         .result-box { margin-top: 15px; padding: 15px; border-radius: 15px; display: none; font-size: 0.9rem; border-left: 5px solid; }
         .status-cloud { font-size: 0.65rem; color: #94a3b8; margin-top: -10px; margin-bottom: 10px; text-align: right; font-style: italic; }
         .footer { text-align: center; margin-top: 30px; font-size: 0.7rem; color: #94a3b8; border-top: 1px solid #e2e8f0; padding-top: 15px; }
+        #branch { border: 2px solid var(--primary); background: #fffcf9; color: var(--primary); font-weight: 800; }
     </style>
 </head>
 <body>
@@ -42,7 +43,15 @@
     </div>
 
     <div class="card">
-        <div class="section-header" style="margin-top:0;">INPUT TRANSAKSI</div>
+        <div class="section-header" style="margin-top:0;">LOKASI CABANG / MITRA</div>
+        <select id="branch">
+            <option value="Cabang Pahlawan">📍 Cabang Pahlawan</option>
+            <option value="Cabang Mondokan">📍 Cabang Mondokan</option>
+            <option value="Mitra Merakurak">🤝 Mitra Merakurak</option>
+            <option value="Mitra Jenu">🤝 Mitra Jenu</option>
+        </select>
+
+        <div class="section-header">INPUT TRANSAKSI</div>
         <input type="tel" id="phone" placeholder="Nomor WA (Contoh: 0812...)" onblur="cekDataCloud()">
         <div id="statusCloud" class="status-cloud"></div>
         <input type="text" id="name" placeholder="Nama Pelanggan">
@@ -113,25 +122,48 @@
         const phone = document.getElementById('phone').value;
         const nameInput = document.getElementById('name').value;
         const dobInput = document.getElementById('dob').value;
+        const branch = document.getElementById('branch').value;
         const amount = parseInt(document.getElementById('amount').value || 0);
+        
         if (!phone) return alert("Isi nomor WA!");
+        
         let db = getDb();
         const now = new Date().toISOString();
-        let currentSisa = db[phone] ? (parseInt(db[phone].sisaUang) || 0) : 0;
+        let user = db[phone] || { points: 0, sisaUang: 0 };
+        
+        let currentSisa = parseInt(user.sisaUang) || 0;
         let totalUang = currentSisa + amount;
         let poinBaru = Math.floor(totalUang / 10000);
         let sisaBaru = totalUang % 10000;
-        if (db[phone]) {
-            db[phone].points += poinBaru; db[phone].sisaUang = sisaBaru; db[phone].lastVisit = now;
-            if(nameInput) db[phone].name = nameInput; if(dobInput) db[phone].dob = dobInput;
-        } else { db[phone] = { name: nameInput || "Pelanggan", points: poinBaru, lastVisit: now, dob: dobInput || "", sisaUang: sisaBaru }; }
+        
+        user.points = (parseInt(user.points) || 0) + poinBaru;
+        user.sisaUang = sisaBaru;
+        user.lastVisit = now;
+        if(nameInput) user.name = nameInput;
+        if(dobInput) user.dob = dobInput;
+        
+        db[phone] = user;
         saveDb(db);
-        fetch(SPREADSHEET_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ phone, name: db[phone].name, points: db[phone].points, dob: db[phone].dob, amount }) });
-        lastActiveUser = { phone, ...db[phone] };
-        updateStatusUI(db[phone].points, db[phone].sisaUang);
+
+        fetch(SPREADSHEET_URL, { 
+            method: 'POST', 
+            mode: 'no-cors', 
+            body: JSON.stringify({ 
+                phone, 
+                name: user.name, 
+                points: user.points, 
+                dob: user.dob, 
+                amount,
+                branch: branch 
+            }) 
+        });
+
+        lastActiveUser = { phone, ...user };
+        updateStatusUI(user.points, user.sisaUang);
+        
         const out = document.getElementById('output');
         out.style.display = 'block'; out.style.background = '#f0fdf4';
-        out.innerHTML = `✅ <strong>Berhasil!</strong><br>Poin: ${db[phone].points} | Tabungan Sisa: Rp${db[phone].sisaUang}`;
+        out.innerHTML = `✅ <strong>Simpan Berhasil!</strong><br><small>Cabang: ${branch}</small>`;
         document.getElementById('btnSapa').style.display = 'flex';
         document.getElementById('amount').value = "";
     }
@@ -199,16 +231,28 @@
     function redeemPoin() {
         const phone = document.getElementById('phone').value;
         const cost = parseInt(document.getElementById('reward').value);
+        const branch = document.getElementById('branch').value;
         let db = getDb();
         if (!db[phone] || db[phone].points < cost) return alert("Poin kurang!");
         db[phone].points -= cost; db[phone].lastVisit = new Date().toISOString();
         saveDb(db);
         updateStatusUI(db[phone].points, db[phone].sisaUang);
         lastActiveUser = { phone, ...db[phone] };
-        fetch(SPREADSHEET_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ phone, name: db[phone].name, points: db[phone].points, dob: db[phone].dob, amount: 0 }) });
+        fetch(SPREADSHEET_URL, { 
+            method: 'POST', 
+            mode: 'no-cors', 
+            body: JSON.stringify({ 
+                phone, 
+                name: db[phone].name, 
+                points: db[phone].points, 
+                dob: db[phone].dob, 
+                amount: 0,
+                branch: branch 
+            }) 
+        });
         const out = document.getElementById('output');
         out.style.display = 'block'; out.style.background = '#fef2f2';
-        out.innerHTML = `🎁 <strong>Redeem Berhasil!</strong><br>Sisa Poin: ${db[phone].points}`;
+        out.innerHTML = `🎁 <strong>Redeem Berhasil!</strong><br><small>Lokasi: ${branch}</small>`;
         document.getElementById('btnSapa').style.display = 'flex';
     }
     window.onload = refreshDashboards;
