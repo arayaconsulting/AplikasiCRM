@@ -15,12 +15,13 @@
         .section-header { font-size: 0.7rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin: 20px 0 10px 0; display: flex; align-items: center; letter-spacing: 0.5px; }
         .section-header::after { content: ""; flex: 1; height: 1px; background: #e2e8f0; margin-left: 10px; }
         label { font-size: 0.7rem; font-weight: 600; display: block; margin-bottom: 4px; color: #475569; }
-        input, select { width: 100%; padding: 12px; margin-bottom: 12px; border: 2px solid #f1f5f9; border-radius: 12px; box-sizing: border-box; font-size: 0.95rem; background: #f8fafc; }
+        input, select { width: 100%; padding: 12px; margin-bottom: 12px; border: 2px solid #f1f5f9; border-radius: 12px; box-sizing: border-box; font-size: 0.95rem; background: #f8fafc; font-weight: 500; }
         .btn { width: 100%; padding: 14px; border: none; border-radius: 14px; font-weight: 700; cursor: pointer; font-size: 0.95rem; transition: 0.3s; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 8px; }
         .btn-save { background: var(--success); color: white; }
         .btn-wa { background: var(--wa); color: white; display: none; }
         .btn-redeem { background: var(--secondary); color: white; }
         .item-row { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-radius: 15px; margin-bottom: 8px; border: 1px solid; }
+        .follow-up { background: #fff5eb; border-color: #ffe0b2; }
         .birthday-row { background: #eef7ff; border-color: #cde4f7; }
         .info-text { font-size: 0.8rem; }
         .info-text strong { display: block; font-size: 0.9rem; color: var(--secondary); }
@@ -75,12 +76,16 @@
         <div id="listUltah"></div>
     </div>
 
+    <div class="card">
+        <div class="section-header">🚪 DASHBOARD FOLLOW-UP (≥ 10 HARI)</div>
+        <div id="listFollowUp"></div>
+    </div>
+
     <div class="footer">Developed by <strong>Araya Consulting</strong> &copy; 2026</div>
 </div>
 
 <script>
-    // BYT UT DENNA URL TILL DIN NYA DEPLOYMENT URL FRÅN APPS SCRIPT
-    const SPREADSHEET_URL = "https://script.google.com/macros/s/AKfycbxxN4m1LnHXV7wEZbvqGjm1EqYBA5gRClj_nSeVzHg2yZkvMaoSy9NqzZe40IvYFA8T/exec"; 
+    const SPREADSHEET_URL = "https://script.google.com/macros/s/AKfycbykPg33CZ1Zk8yUPViaD45E7UVYxU-f4z4Wn7kuHzt6X3Cg7AETlXaUO99ggoxWefVS/exec"; 
     const STORAGE_KEY = 'seblaksalah_crm_v3';
     let lastActiveUser = null;
 
@@ -141,18 +146,10 @@
         db[phone] = user;
         saveDb(db);
 
-        // Skickar data till Google Sheets inklusive Filial (Branch)
         fetch(SPREADSHEET_URL, { 
             method: 'POST', 
             mode: 'no-cors', 
-            body: JSON.stringify({ 
-                phone, 
-                name: user.name, 
-                points: user.points, 
-                dob: user.dob, 
-                amount,
-                branch: branch 
-            }) 
+            body: JSON.stringify({ phone, name: user.name, points: user.points, dob: user.dob, amount, branch }) 
         });
 
         lastActiveUser = { phone, ...user };
@@ -168,10 +165,7 @@
     function sapaPelanggan() {
         if (!lastActiveUser) return;
         const pts = lastActiveUser.points;
-        const sisa = lastActiveUser.sisaUang;
-        let infoPoin = pts >= 10 ? `\n🔥 *Hore!* Poin Kakak sudah bisa ditukar dengan menu favorit gratis!\n` : `\n`;
-        const katalog = `*Katalog Penukaran Poin:* \n🍹 10 Pts: Es Teh \n🥟 20 Pts: Dimsum \n🍲 25 Pts: Seblak Lengkap`;
-        const pesan = `Halo Kak ${lastActiveUser.name}! 👋\n\nTerima kasih sudah mampir ke *Seblak Salah*. 😊\n\nSaldo Poin: *${pts} Poin*\nTabungan Sisa: *Rp${sisa}*${infoPoin}\n${katalog}\n\nDitunggu kedatangannya lagi ya kak!`;
+        const pesan = `Halo Kak ${lastActiveUser.name}! 👋\nTerima kasih sudah mampir ke *Seblak Salah*. Saldo Poin Kakak: *${pts} Poin*. Ditunggu kedatangannya lagi ya kak!`;
         window.open(`https://wa.me/${lastActiveUser.phone.replace(/^0/, '62')}?text=${encodeURIComponent(pesan)}`, '_blank');
         document.getElementById('btnSapa').style.display = 'none';
     }
@@ -179,23 +173,30 @@
     function refreshDashboards() {
         const db = getDb();
         const listUltah = document.getElementById('listUltah');
-        listUltah.innerHTML = "";
+        const listFollowUp = document.getElementById('listFollowUp');
+        listUltah.innerHTML = ""; listFollowUp.innerHTML = "";
         const today = new Date();
+
         for (let phone in db) {
+            // Dashboard Ultah
             if (db[phone].dob) {
                 const bday = new Date(db[phone].dob);
                 if (bday.getDate() === today.getDate() && bday.getMonth() === today.getMonth()) {
                     const row = document.createElement('div'); row.className = 'item-row birthday-row';
-                    row.innerHTML = `<div class="info-text"><strong>${db[phone].name}</strong>HARI INI ULTAH! 🎂</div><button class="btn-mini-wa" onclick="kirimUltah('${phone}', '${db[phone].name}')">Traktir</button>`;
+                    row.innerHTML = `<div class="info-text"><strong>${db[phone].name}</strong>HARI INI ULTAH! 🎂</div><button class="btn-mini-wa" onclick="window.open('https://wa.me/${phone.replace(/^0/,'62')}?text=HBD!')">Traktir</button>`;
                     listUltah.appendChild(row);
                 }
             }
+            // Dashboard Follow Up (10 Hari)
+            if (db[phone].lastVisit) {
+                const diffDays = Math.ceil(Math.abs(today - new Date(db[phone].lastVisit)) / (1000 * 60 * 60 * 24));
+                if (diffDays >= 10) {
+                    const row = document.createElement('div'); row.className = 'item-row follow-up';
+                    row.innerHTML = `<div class="info-text"><strong>${db[phone].name}</strong>(${diffDays} hari tidak mampir)</div><button class="btn-mini-wa" onclick="window.open('https://wa.me/${phone.replace(/^0/,'62')}?text=Kangen!')">Sapa</button>`;
+                    listFollowUp.appendChild(row);
+                }
+            }
         }
-    }
-
-    function kirimUltah(phone, nama) {
-        const pesan = `Halo Kak ${nama}! 👋\n\nKami dari *Seblak Salah* ingin mengucapkan *Selamat Ulang Tahun*! 🎂✨\n\nSemoga panjang umur, sehat selalu, dan dilancarkan rezekinya. Sebagai kado spesial, Seblak Salah mau *MENTRAKTIR* Kakak 1 Porsi SEBLAK LENGKAP gratis! 😍`;
-        window.open(`https://wa.me/${phone.replace(/^0/, '62')}?text=${encodeURIComponent(pesan)}`, '_blank');
     }
 
     function redeemPoin() {
@@ -206,21 +207,13 @@
         if (!db[phone] || db[phone].points < cost) return alert("Poin kurang!");
         
         db[phone].points -= cost; 
-        db[phone].lastVisit = new Date().toISOString();
         saveDb(db);
         updateStatusUI(db[phone].points, db[phone].sisaUang);
         
         fetch(SPREADSHEET_URL, { 
             method: 'POST', 
             mode: 'no-cors', 
-            body: JSON.stringify({ 
-                phone, 
-                name: db[phone].name, 
-                points: db[phone].points, 
-                dob: db[phone].dob, 
-                amount: 0,
-                branch: branch 
-            }) 
+            body: JSON.stringify({ phone, name: db[phone].name, points: db[phone].points, dob: db[phone].dob, amount: 0, branch }) 
         });
         
         const out = document.getElementById('output');
@@ -231,4 +224,3 @@
 </script>
 </body>
 </html>
-``` Swedish
