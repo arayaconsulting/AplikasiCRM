@@ -17,7 +17,7 @@
         .section-header::after { content: ""; flex: 1; height: 1px; background: linear-gradient(to right, #e2e8f0, transparent); margin-left: 12px; }
         input, select { width: 100%; padding: 14px; margin-bottom: 15px; border: 2px solid #f1f5f9; border-radius: 16px; box-sizing: border-box; font-size: 1rem; background: #f8fafc; transition: 0.3s; font-weight: 500; }
         input:focus { border-color: var(--primary); outline: none; background: #fff; box-shadow: 0 0 0 4px rgba(230, 126, 34, 0.1); }
-        .btn { width: 100%; padding: 16px; border: none; border-radius: 18px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; font-size: 1rem; transition: 0.2s active; }
+        .btn { width: 100%; padding: 16px; border: none; border-radius: 18px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; font-size: 1rem; }
         .btn-save { background: var(--success); color: white; box-shadow: 0 8px 20px rgba(39, 174, 96, 0.2); }
         .btn-wa { background: var(--wa); color: white; display: none; box-shadow: 0 8px 20px rgba(37, 211, 102, 0.2); }
         .status-cloud { font-size: 0.75rem; color: #64748b; text-align: right; margin-top: -10px; margin-bottom: 15px; font-weight: 600; }
@@ -76,7 +76,7 @@
 </div>
 
 <script>
-    const SPREADSHEET_URL = "https://script.google.com/macros/s/AKfycbwq9-kvM_qtnWuSz--62XdG6vD0QkIKmC52yyoU51p0nHTVZqm9pSoX97bMbiA6K_mx/exec"; 
+    const SPREADSHEET_URL = "https://script.google.com/macros/s/AKfycbxzBhTyx6w8yCVkqrrrIL374aHV4BDr1X4BHQOky3s_YCThu3MqpAZF1SBPnBBLvx57/exec"; 
     const STORAGE_KEY = 'seblaksalah_crm_v3';
     let lastActiveUser = null;
 
@@ -129,7 +129,6 @@
         db[phone] = user;
         saveDb(db);
         
-        // Kirim ke Apps Script (Logika Update Baris)
         fetch(SPREADSHEET_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ phone, name, points: user.points, dob, amount, branch }) });
 
         lastActiveUser = { phone, ...user };
@@ -147,8 +146,8 @@
         const pts = lastActiveUser.points;
         const sisa = lastActiveUser.sisaUang;
         let infoPoin = pts >= 10 ? `\n🔥 *Hore!* Poin Kakak sudah bisa ditukar dengan menu favorit gratis!\n` : `\n`;
-        const katalog = `*Katalog Penukaran Poin:* \n🍹 10 Pts: Es Teh \n🥟 20 Pts: Dimsum \n🍲 25 Pts: Seblak Lengkap`;
-        const pesan = `Halo Kak ${lastActiveUser.name}! 👋\n\nTerima kasih sudah mampir ke *Seblak Salah*. 😊\n\nSaldo Poin: *${pts} Poin*\nTabungan Sisa: *Rp${sisa}*${infoPoin}\n${katalog}\n\nDitunggu kedatangannya lagi ya kak!`;
+        const katalog = `*Katalog Penukaran Poin:* \n🍹 10 Pts: Es Teh \n🍲 25 Pts: Seblak Lengkap`;
+        const pesan = `Halo Kak ${lastActiveUser.name}! 👋\n\nTerima kasih sudah mampir ke *Seblak Salah*. 😊\n\nSaldo Poin: *${pts} Poin*\nTabungan Sisa: *Rp${sisa}*${infoPoin}${katalog}\n\nDitunggu kedatangannya lagi ya kak!`;
         window.open(`https://wa.me/${lastActiveUser.phone.replace(/^0/, '62')}?text=${encodeURIComponent(pesan)}`, '_blank');
         document.getElementById('btnSapa').style.display = 'none';
     }
@@ -163,7 +162,6 @@
 
         for (let phone in db) {
             const user = db[phone];
-            // Logika Ultah H-1 & Hari H
             if (user.dob) {
                 const bday = new Date(user.dob);
                 const isToday = bday.getDate() === today.getDate() && bday.getMonth() === today.getMonth();
@@ -173,7 +171,6 @@
                     listUltah.innerHTML += `<div class="item-row birthday-row"><div><strong>${user.name}</strong><br><small>${isToday ? 'Hari Ini' : 'Besok'}</small></div><button class="btn" style="width:auto; padding:8px 15px; background:var(--wa); color:white; font-size:0.8rem; margin:0;" onclick="window.open('https://wa.me/${phone.replace(/^0/,'62')}?text=${encodeURIComponent(pesanUltah)}')">Traktir</button></div>`;
                 }
             }
-            // Logika Follow-up 10 hari (Pesan Rindu)
             if (user.lastVisit) {
                 const diffDays = Math.ceil(Math.abs(today - new Date(user.lastVisit)) / (1000 * 60 * 60 * 24));
                 if (diffDays >= 10) {
