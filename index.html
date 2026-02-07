@@ -9,67 +9,60 @@
         body { font-family: 'Segoe UI', Roboto, sans-serif; background: var(--bg); margin: 0; padding: 15px; color: #333; }
         .container { max-width: 500px; margin: auto; }
         .branding { text-align: center; margin-bottom: 25px; }
-        .branding img { width: 160px; height: auto; margin-bottom: 10px; display: block; margin-left: auto; margin-right: auto; }
+        .branding img { width: 160px; height: auto; margin-bottom: 5px; }
         .branding h1 { font-size: 1.6rem; color: var(--primary); margin: 0; font-weight: 800; }
+        .branding p { font-size: 0.8rem; color: #7f8c8d; margin: 2px 0; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
         .card { background: var(--card); padding: 20px; border-radius: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); border: 1px solid #edf2f7; margin-bottom: 15px; }
         .section-header { font-size: 0.7rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin: 20px 0 10px 0; display: flex; align-items: center; letter-spacing: 0.5px; }
         .section-header::after { content: ""; flex: 1; height: 1px; background: #e2e8f0; margin-left: 10px; }
         input, select { width: 100%; padding: 12px; margin-bottom: 12px; border: 2px solid #f1f5f9; border-radius: 12px; box-sizing: border-box; font-size: 0.95rem; background: #f8fafc; }
-        .btn { width: 100%; padding: 14px; border: none; border-radius: 14px; font-weight: 700; cursor: pointer; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; }
+        .btn { width: 100%; padding: 14px; border: none; border-radius: 14px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; }
         .btn-save { background: var(--success); color: white; }
         .btn-wa { background: var(--wa); color: white; display: none; }
-        .item-row { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-radius: 15px; margin-bottom: 8px; border: 1px solid; }
+        .status-cloud { font-size: 0.65rem; color: #94a3b8; text-align: right; margin-bottom: 10px; font-style: italic; }
+        .item-row { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-radius: 15px; margin-bottom: 8px; border: 1px solid; font-size: 0.8rem; }
         .follow-up { background: #fff5eb; border-color: #ffe0b2; }
         .birthday-row { background: #eef7ff; border-color: #cde4f7; }
-        .info-text { font-size: 0.8rem; }
-        .info-text strong { display: block; font-size: 0.9rem; color: var(--secondary); }
-        .status-cloud { font-size: 0.65rem; color: #94a3b8; text-align: right; margin-bottom: 10px; font-style: italic; }
         #branch { border: 2px solid var(--primary); background: #fffcf9; font-weight: 800; color: var(--primary); }
-        #output { display:none; padding:15px; border-radius:15px; margin-top:10px; font-size:0.9rem; border-left:5px solid var(--success); background:#f0fdf4; }
     </style>
 </head>
 <body>
 <div class="container">
     <div class="branding">
-        <img src="logo.png" alt="Seblak Salah">
+        <img src="logo.png" alt="Araya Consulting">
         <h1>Seblak Salah</h1>
+        <p>LOYALTY PROGRAM MANAGEMENT</p>
     </div>
-
     <div class="card">
-        <div class="section-header">LOKASI CABANG / MITRA</div>
+        <div class="section-header" style="margin-top:0;">LOKASI CABANG</div>
         <select id="branch">
             <option value="Cabang Pahlawan">📍 Cabang Pahlawan</option>
             <option value="Cabang Mondokan">📍 Cabang Mondokan</option>
             <option value="Mitra Merakurak">🤝 Mitra Merakurak</option>
             <option value="Mitra Jenu">🤝 Mitra Jenu</option>
         </select>
-
         <div class="section-header">INPUT TRANSAKSI</div>
-        <input type="tel" id="phone" placeholder="Nomor WA (08...)" onblur="cekDataCloud()">
+        <input type="tel" id="phone" placeholder="Nomor WA (Contoh: 0812...)" onblur="cekDataCloud()">
         <div id="statusCloud" class="status-cloud"></div>
         <input type="text" id="name" placeholder="Nama Pelanggan">
         <input type="date" id="dob">
         <input type="number" id="amount" placeholder="Nominal Belanja (Rp)">
-        
         <button class="btn btn-save" onclick="tambahPoin()">Simpan Transaksi</button>
         <button id="btnSapa" class="btn btn-wa" onclick="sapaPelanggan()">Kirim Sapaan (WA)</button>
-        
         <div class="section-header">REDEEM REWARD</div>
         <select id="reward">
             <option value="10">Es Teh Manis (10 Pts)</option>
             <option value="25">Seblak Lengkap (25 Pts)</option>
         </select>
         <button class="btn" style="background:var(--secondary); color:white;" onclick="redeemPoin()">Tukarkan Poin</button>
-        <div id="output"></div>
+        <div id="output" style="display:none; padding:15px; border-radius:15px; margin-top:10px; font-size:0.9rem; border-left:5px solid var(--success); background:#f0fdf4;"></div>
     </div>
-
     <div class="card">
-        <div class="section-header" style="color:var(--birthday);">🎂 ULANG TAHUN (H-1 & Hari H)</div>
+        <div class="section-header" style="color:var(--birthday);">🎂 PENGINGAT ULANG TAHUN (H-1)</div>
         <div id="listUltah"></div>
     </div>
-
     <div class="card">
-        <div class="section-header">🚪 FOLLOW-UP (≥ 10 HARI TIDAK MAMPIR)</div>
+        <div class="section-header">🚪 DASHBOARD FOLLOW-UP (≥ 10 HARI)</div>
         <div id="listFollowUp"></div>
     </div>
 </div>
@@ -93,14 +86,8 @@
                 document.getElementById('name').value = data.name || "";
                 if (data.dob) document.getElementById('dob').value = data.dob.split('T')[0];
                 document.getElementById('statusCloud').innerHTML = `✅ Saldo: ${data.points} Pts | Sisa: Rp${data.sisaUang || 0}`;
-                document.getElementById('statusCloud').style.color = "#27ae60";
-                let db = getDb();
-                db[phone] = { ...data };
-                saveDb(db);
-            } else {
-                document.getElementById('statusCloud').innerHTML = "ℹ️ Pelanggan Baru";
-                document.getElementById('statusCloud').style.color = "#e67e22";
-            }
+                let db = getDb(); db[phone] = { ...data }; saveDb(db);
+            } else { document.getElementById('statusCloud').innerHTML = "ℹ️ Pelanggan Baru"; }
         } catch (e) { document.getElementById('statusCloud').innerHTML = "⚠️ Gagal ambil data."; }
     }
 
@@ -110,7 +97,6 @@
         const dob = document.getElementById('dob').value;
         const branch = document.getElementById('branch').value;
         const amount = parseInt(document.getElementById('amount').value || 0);
-        
         if (!phone) return alert("Isi nomor WA!");
 
         let db = getDb();
@@ -120,18 +106,22 @@
         user.sisaUang = totalUang % 10000;
         user.name = name; user.dob = dob; user.lastVisit = new Date().toISOString();
         
-        db[phone] = user;
-        saveDb(db);
-        
+        db[phone] = user; saveDb(db);
         fetch(SPREADSHEET_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ phone, name, points: user.points, dob, amount, branch }) });
 
         lastActiveUser = { phone, ...user };
         document.getElementById('statusCloud').innerHTML = `✅ Saldo: ${user.points} Pts | Sisa: Rp${user.sisaUang}`;
-        const out = document.getElementById('output');
-        out.style.display = 'block';
-        out.innerHTML = `✅ <strong>Berhasil Disimpan!</strong><br>Poin: ${user.points} | Lokasi: ${branch}`;
+        document.getElementById('output').style.display = 'block';
+        document.getElementById('output').innerHTML = `✅ <strong>Berhasil!</strong><br>Poin: ${user.points} | Cabang: ${branch}`;
         document.getElementById('btnSapa').style.display = 'flex';
         document.getElementById('amount').value = "";
+    }
+
+    function sapaPelanggan() {
+        if (!lastActiveUser) return;
+        const pesan = `Halo Kak ${lastActiveUser.name}! 👋\n\nTerima kasih sudah mampir ke *Seblak Salah*. 😊\n\nSaldo Poin: *${lastActiveUser.points} Poin*\nTabungan Sisa: *Rp${lastActiveUser.sisaUang}*\n\nDitunggu kedatangannya lagi ya kak!`;
+        window.open(`https://wa.me/${lastActiveUser.phone.replace(/^0/, '62')}?text=${encodeURIComponent(pesan)}`, '_blank');
+        document.getElementById('btnSapa').style.display = 'none';
     }
 
     function refreshDashboards() {
@@ -139,36 +129,26 @@
         const listUltah = document.getElementById('listUltah');
         const listFollowUp = document.getElementById('listFollowUp');
         listUltah.innerHTML = ""; listFollowUp.innerHTML = "";
-        
         const today = new Date();
         const tomorrow = new Date(); tomorrow.setDate(today.getDate() + 1);
 
         for (let phone in db) {
             const user = db[phone];
-            // Logika Ultah H-1
             if (user.dob) {
                 const bday = new Date(user.dob);
                 const isToday = bday.getDate() === today.getDate() && bday.getMonth() === today.getMonth();
                 const isTomorrow = bday.getDate() === tomorrow.getDate() && bday.getMonth() === tomorrow.getMonth();
                 if (isToday || isTomorrow) {
-                    listUltah.innerHTML += `<div class="item-row birthday-row"><div class="info-text"><strong>${user.name}</strong>${isToday ? 'HARI INI!' : 'BESOK'} 🎂</div><button class="btn" style="width:auto; padding:5px 10px; background:var(--wa); color:white; font-size:0.7rem;" onclick="window.open('https://wa.me/${phone.replace(/^0/,'62')}?text=Selamat Ultah!')">Traktir</button></div>`;
+                    listUltah.innerHTML += `<div class="item-row birthday-row"><div><strong>${user.name}</strong>${isToday ? 'HARI INI!' : 'Besok'}</div><button style="background:var(--wa); color:white; border:none; border-radius:8px; padding:5px 10px; font-size:0.7rem;" onclick="window.open('https://wa.me/${phone.replace(/^0/,'62')}?text=${encodeURIComponent('Halo Kak ' + user.name + '! 👋\\n\\nKami dari *Seblak Salah* ingin mengucapkan *Selamat Ulang Tahun*! 🎂✨\\n\\nSemoga panjang umur, sehat selalu, dan dilancarkan rezekinya. Sebagai kado spesial, Seblak Salah mau *MENTRAKTIR* Kakak 1 Porsi SEBLAK LENGKAP gratis! 😍')}')">Traktir</button></div>`;
                 }
             }
-            // Logika Follow-up 10 hari
             if (user.lastVisit) {
                 const diffDays = Math.ceil(Math.abs(today - new Date(user.lastVisit)) / (1000 * 60 * 60 * 24));
                 if (diffDays >= 10) {
-                    listFollowUp.innerHTML += `<div class="item-row follow-up"><div class="info-text"><strong>${user.name}</strong>Sudah ${diffDays} hari tidak mampir.</div><button class="btn" style="width:auto; padding:5px 10px; background:var(--secondary); color:white; font-size:0.7rem;" onclick="window.open('https://wa.me/${phone.replace(/^0/,'62')}?text=Kangen Seblak nih!')">Sapa</button></div>`;
+                    listFollowUp.innerHTML += `<div class="item-row follow-up"><div><strong>${user.name}</strong>(${diffDays} hari)</div><button style="background:var(--secondary); color:white; border:none; border-radius:8px; padding:5px 10px; font-size:0.7rem;" onclick="window.open('https://wa.me/${phone.replace(/^0/,'62')}?text=${encodeURIComponent('Selamat Siang, apa kabarnya Kak ' + user.name + '? 👋\\n\\nSemoga Kakak sehat dan bahagia selalu ya. Di Seblak Salah, kami tiba-tiba teringat Kakak karena sudah ' + diffDays + ' hari Kakak tidak mampir ke sini. ✨\\n\\nRasanya ada yang kurang kalau meja favorit Kakak kosong terlalu lama. Oh iya, Kakak masih punya tabungan ' + user.points + ' Poin loh, sayang banget kalau tidak dimanfaatkan. 😊\\n\\nYuk, sempatkan mampir lagi. Kami tunggu ya Kak untuk melepas rindu dengan aroma kencur dan pedas khas Seblak Salah! 🍲✨')}')">Sapa</button></div>`;
                 }
             }
         }
-    }
-
-    function sapaPelanggan() {
-        if (!lastActiveUser) return;
-        const pesan = `Halo Kak ${lastActiveUser.name}! 👋\nTerima kasih sudah jajan di *Seblak Salah*. Poin Kakak sekarang: *${lastActiveUser.points} Poin*. Ditunggu kedatangannya lagi ya! 🍲✨`;
-        window.open(`https://wa.me/${lastActiveUser.phone.replace(/^0/, '62')}?text=${encodeURIComponent(pesan)}`, '_blank');
-        document.getElementById('btnSapa').style.display = 'none';
     }
 
     function redeemPoin() {
@@ -176,20 +156,14 @@
         const cost = parseInt(document.getElementById('reward').value);
         const branch = document.getElementById('branch').value;
         let db = getDb();
-        if (!db[phone] || db[phone].points < cost) return alert("Poin tidak cukup!");
-        
-        db[phone].points -= cost; 
-        saveDb(db);
+        if (!db[phone] || db[phone].points < cost) return alert("Poin kurang!");
+        db[phone].points -= cost; saveDb(db);
         document.getElementById('statusCloud').innerHTML = `✅ Saldo: ${db[phone].points} Pts | Sisa: Rp${db[phone].sisaUang}`;
-        
         fetch(SPREADSHEET_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ phone, name: db[phone].name, points: db[phone].points, dob: db[phone].dob, amount: 0, branch }) });
-        
-        const out = document.getElementById('output');
-        out.style.display = 'block';
-        out.style.background = '#fef2f2';
-        out.innerHTML = `🎁 <strong>Redeem Berhasil!</strong><br>Sisa Poin: ${db[phone].points}<br><small>Outlet: ${branch}</small>`;
+        document.getElementById('output').style.display = 'block';
+        document.getElementById('output').style.background = '#fef2f2';
+        document.getElementById('output').innerHTML = `🎁 <strong>Redeem Berhasil!</strong><br>Sisa: ${db[phone].points} Pts | Lokasi: ${branch}`;
     }
-
     window.onload = refreshDashboards;
 </script>
 </body>
