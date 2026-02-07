@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CRM Seblak Salah - Multibranch System</title>
+    <title>CRM Seblak Salah - Powered by Araya Consulting</title>
     <style>
         :root { --primary: #e67e22; --secondary: #2c3e50; --success: #27ae60; --wa: #25d366; --birthday: #3498db; --bg: #f4f7f6; --card: #ffffff; }
         body { font-family: 'Segoe UI', Roboto, sans-serif; background: var(--bg); margin: 0; padding: 15px; color: #333; }
@@ -28,7 +28,6 @@
         .btn-mini-wa { padding: 6px 12px; background: var(--wa); color: white; border: none; border-radius: 10px; font-weight: bold; font-size: 0.75rem; cursor: pointer; }
         .result-box { margin-top: 15px; padding: 15px; border-radius: 15px; display: none; font-size: 0.9rem; border-left: 5px solid; }
         .status-cloud { font-size: 0.65rem; color: #94a3b8; margin-top: -10px; margin-bottom: 10px; text-align: right; font-style: italic; }
-        .footer { text-align: center; margin-top: 30px; font-size: 0.7rem; color: #94a3b8; border-top: 1px solid #e2e8f0; padding-top: 15px; }
         #branch { border: 2px solid var(--primary); background: #fffcf9; color: var(--primary); font-weight: 800; }
     </style>
 </head>
@@ -72,7 +71,7 @@
     </div>
 
     <div class="card">
-        <div class="section-header" style="color: var(--birthday);">🎂 PENGINGAT ULANG TAHUN</div>
+        <div class="section-header" style="color: var(--birthday);">🎂 PENGINGAT ULANG TAHUN (H-1)</div>
         <div id="listUltah"></div>
     </div>
 
@@ -80,8 +79,6 @@
         <div class="section-header">🚪 DASHBOARD FOLLOW-UP (≥ 10 HARI)</div>
         <div id="listFollowUp"></div>
     </div>
-
-    <div class="footer">Developed by <strong>Araya Consulting</strong> &copy; 2026</div>
 </div>
 
 <script>
@@ -107,16 +104,22 @@
             const data = await response.json();
             if (data && !data.error) {
                 document.getElementById('name').value = data.name || "";
-                if (data.dob) document.getElementById('dob').value = data.dob;
+                if (data.dob) {
+                    let d = data.dob.split('T')[0].split(' ')[0];
+                    document.getElementById('dob').value = d;
+                }
                 let db = getDb();
-                db[phone] = { name: data.name, points: data.points, lastVisit: data.lastVisit, dob: data.dob, sisaUang: data.sisaUang || 0 };
+                db[phone] = { ...data };
                 saveDb(db);
                 updateStatusUI(data.points, data.sisaUang);
             } else {
                 document.getElementById('statusCloud').innerHTML = "ℹ️ Pelanggan Baru";
                 document.getElementById('statusCloud').style.color = "#e67e22";
             }
-        } catch (e) { console.error(e); }
+        } catch (e) { 
+            console.error(e); 
+            document.getElementById('statusCloud').innerHTML = "⚠️ Gagal ambil data.";
+        }
     }
 
     function tambahPoin() {
@@ -175,15 +178,22 @@
         const listUltah = document.getElementById('listUltah');
         const listFollowUp = document.getElementById('listFollowUp');
         listUltah.innerHTML = ""; listFollowUp.innerHTML = "";
+        
         const today = new Date();
+        const tomorrow = new Date();
+        tomorrow.setDate(today.getDate() + 1);
 
         for (let phone in db) {
-            // Dashboard Ultah
+            // Dashboard Ultah H-1 dan Hari H
             if (db[phone].dob) {
                 const bday = new Date(db[phone].dob);
-                if (bday.getDate() === today.getDate() && bday.getMonth() === today.getMonth()) {
-                    const row = document.createElement('div'); row.className = 'item-row birthday-row';
-                    row.innerHTML = `<div class="info-text"><strong>${db[phone].name}</strong>HARI INI ULTAH! 🎂</div><button class="btn-mini-wa" onclick="window.open('https://wa.me/${phone.replace(/^0/,'62')}?text=HBD!')">Traktir</button>`;
+                const isToday = bday.getDate() === today.getDate() && bday.getMonth() === today.getMonth();
+                const isTomorrow = bday.getDate() === tomorrow.getDate() && bday.getMonth() === tomorrow.getMonth();
+                
+                if (isToday || isTomorrow) {
+                    const row = document.createElement('div');
+                    row.className = 'item-row birthday-row';
+                    row.innerHTML = `<div class="info-text"><strong>${db[phone].name}</strong>Ultah: ${isToday ? "HARI INI!" : "BESOK"} 🎂</div><button class="btn-mini-wa" onclick="kirimUltah('${phone}', '${db[phone].name}')">Traktir</button>`;
                     listUltah.appendChild(row);
                 }
             }
@@ -191,12 +201,25 @@
             if (db[phone].lastVisit) {
                 const diffDays = Math.ceil(Math.abs(today - new Date(db[phone].lastVisit)) / (1000 * 60 * 60 * 24));
                 if (diffDays >= 10) {
-                    const row = document.createElement('div'); row.className = 'item-row follow-up';
-                    row.innerHTML = `<div class="info-text"><strong>${db[phone].name}</strong>(${diffDays} hari tidak mampir)</div><button class="btn-mini-wa" onclick="window.open('https://wa.me/${phone.replace(/^0/,'62')}?text=Kangen!')">Sapa</button>`;
+                    const row = document.createElement('div');
+                    row.className = 'item-row follow-up';
+                    row.innerHTML = `<div class="info-text"><strong>${db[phone].name}</strong>(${diffDays} hari tidak mampir)</div><button class="btn-mini-wa" onclick="kirimRindu('${phone}', '${db[phone].name}', ${db[phone].points}, ${diffDays})">Sapa</button>`;
                     listFollowUp.appendChild(row);
                 }
             }
         }
+    }
+
+    function kirimUltah(phone, nama) {
+        const pesan = `Halo Kak ${nama}! 👋\n\nKami dari *Seblak Salah* ingin mengucapkan *Selamat Ulang Tahun*! 🎂✨\n\nSemoga panjang umur, sehat selalu, dan dilancarkan rezekinya. Sebagai kado spesial, Seblak Salah mau *MENTRAKTIR* Kakak 1 Porsi SEBLAK LENGKAP gratis! 😍\n\nSyaratnya cukup tunjukkan WA ini dan kartu identitas ke kasir. Khusus makan di tempat ya Kak. Ditunggu kedatangannya! 🍲✨`;
+        window.open(`https://wa.me/${phone.replace(/^0/, '62')}?text=${encodeURIComponent(pesan)}`, '_blank');
+    }
+
+    function kirimRindu(phone, nama, poin, hari) {
+        const jam = new Date().getHours();
+        let sapaan = jam < 11 ? "Selamat Pagi" : jam < 15 ? "Selamat Siang" : jam < 18 ? "Selamat Sore" : "Selamat Malam";
+        const pesan = `${sapaan}, apa kabarnya Kak ${nama}? 👋\n\nSemoga Kakak sehat dan bahagia selalu ya. Di *Seblak Salah*, kami tiba-tiba teringat Kakak karena sudah ${hari} hari Kakak tidak mampir ke sini. ✨\n\nRasanya ada yang kurang kalau meja favorit Kakak kosong terlalu lama. Oh iya, Kakak masih punya tabungan *${poin} Poin* loh, sayang banget kalau tidak dimanfaatkan. 😊\n\nYuk, sempatkan mampir lagi. Kami tunggu ya Kak untuk melepas rindu dengan aroma kencur dan pedas khas Seblak Salah! 🍲✨`;
+        window.open(`https://wa.me/${phone.replace(/^0/, '62')}?text=${encodeURIComponent(pesan)}`, '_blank');
     }
 
     function redeemPoin() {
