@@ -3,26 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CRM Seblak Salah - Powered by Araya Consulting</title>
+    <title>CRM Seblak Salah - Final System</title>
     <style>
         :root { --primary: #e67e22; --secondary: #2c3e50; --success: #27ae60; --wa: #25d366; --birthday: #3498db; --bg: #f4f7f6; --card: #ffffff; }
-        body { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: var(--bg); margin: 0; padding: 15px; color: #333; }
+        body { font-family: 'Segoe UI', Roboto, sans-serif; background: var(--bg); margin: 0; padding: 15px; color: #333; }
         .container { max-width: 500px; margin: auto; }
         .branding { text-align: center; margin-bottom: 25px; }
-        .branding img { width: 140px; height: auto; margin-bottom: 10px; }
-        .branding h1 { font-size: 1.8rem; color: var(--primary); margin: 0; font-weight: 800; }
-        .branding p { font-size: 0.75rem; color: #7f8c8d; margin: 2px 0; text-transform: uppercase; letter-spacing: 2px; font-weight: 700; }
+        .branding img { width: 140px; margin-bottom: 5px; }
         .card { background: var(--card); padding: 25px; border-radius: 28px; box-shadow: 0 15px 35px rgba(0,0,0,0.05); border: 1px solid rgba(255,255,255,0.7); margin-bottom: 20px; }
-        .section-header { font-size: 0.7rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin: 25px 0 12px 0; display: flex; align-items: center; letter-spacing: 1px; }
+        .section-header { font-size: 0.7rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin: 25px 0 12px; display: flex; align-items: center; letter-spacing: 1px; }
         .section-header::after { content: ""; flex: 1; height: 1px; background: #e2e8f0; margin-left: 12px; }
         label { font-size: 0.75rem; font-weight: 700; color: #64748b; display: block; margin-bottom: 8px; margin-left: 5px; }
         input, select { width: 100%; padding: 14px; margin-bottom: 15px; border: 2px solid #f1f5f9; border-radius: 16px; box-sizing: border-box; font-size: 1rem; background: #f8fafc; font-weight: 500; }
         .btn { width: 100%; padding: 16px; border: none; border-radius: 18px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; font-size: 1rem; }
-        .btn-save { background: var(--success); color: white; }
-        .btn-wa { background: var(--wa); color: white; display: none; }
+        .btn-save { background: var(--success); color: white; box-shadow: 0 8px 20px rgba(39, 174, 96, 0.2); }
         .status-cloud { font-size: 0.75rem; color: #64748b; text-align: right; margin-top: -10px; margin-bottom: 15px; font-weight: 600; }
         .item-row { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-radius: 20px; margin-bottom: 10px; border: 1px solid #edf2f7; background: #fff; }
-        #branch { border: 2px solid var(--primary); background: #fffcf9; color: var(--primary); font-weight: 800; }
         #output { display:none; padding:18px; border-radius:20px; margin-top:15px; font-size:0.95rem; border-left: 6px solid var(--success); background: #f0fdf4; font-weight: 600; }
     </style>
 </head>
@@ -30,12 +26,12 @@
 <div class="container">
     <div class="branding">
         <img src="logo.png" alt="Araya Consulting">
-        <h1>Seblak Salah</h1>
-        <p>Loyalty Program Management</p>
+        <h1 style="font-size: 1.8rem; color: var(--primary); margin: 0;">Seblak Salah</h1>
+        <p style="font-size: 0.7rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 2px;">Loyalty Management</p>
     </div>
 
     <div class="card">
-        <div class="section-header" style="margin-top:0;">Lokasi Cabang (Hanya Keterangan)</div>
+        <div class="section-header" style="margin-top:0;">Lokasi Cabang</div>
         <select id="branch">
             <option value="Cabang Pahlawan">📍 Cabang Pahlawan</option>
             <option value="Cabang Mondokan">📍 Cabang Mondokan</option>
@@ -48,7 +44,7 @@
         <div id="statusCloud" class="status-cloud"></div>
         
         <label>Nama Pelanggan</label>
-        <input type="text" id="name" placeholder="Masukkan Nama">
+        <input type="text" id="name" placeholder="Nama Lengkap">
         
         <label>Tanggal Lahir</label>
         <input type="date" id="dob">
@@ -57,11 +53,12 @@
         <input type="number" id="amount" placeholder="Contoh: 20000">
         
         <button class="btn btn-save" onclick="tambahPoin()">Simpan Transaksi</button>
-        <button id="btnSapa" class="btn btn-wa" onclick="sapaPelanggan()">Kirim Sapaan (WA)</button>
+        <button id="btnSapa" class="btn" style="background:var(--wa); color:white; display:none;" onclick="sapaPelanggan()">Kirim Sapaan (WA)</button>
         
         <div class="section-header">Redeem Reward</div>
         <select id="reward">
             <option value="10">Es Teh Manis (10 Pts)</option>
+            <option value="20">Dimsum (20 Pts)</option>
             <option value="25">Seblak Lengkap (25 Pts)</option>
         </select>
         <button class="btn" style="background:var(--secondary); color:white;" onclick="redeemPoin()">Tukarkan Poin</button>
@@ -72,11 +69,15 @@
         <div class="section-header" style="color:var(--birthday);">🎂 Pengingat Ulang Tahun (H-1)</div>
         <div id="listUltah"></div>
     </div>
+
+    <div class="card">
+        <div class="section-header">🚪 Dashboard Follow-Up (≥ 10 Hari)</div>
+        <div id="listFollowUp"></div>
+    </div>
 </div>
 
 <script>
-    // URL Deployment Bapak Ali yang Terakhir
-    const SPREADSHEET_URL = "https://script.google.com/macros/s/AKfycbxzBhTyx6w8yCVkqrrrIL374aHV4BDr1X4BHQOky3s_YCThu3MqpAZF1SBPnBBLvx57/exec"; 
+    const SPREADSHEET_URL = "https://script.google.com/macros/s/AKfycby9hQz4FmWseXDkkeaf9UxEgMUSUKIE8Weig1p_9eIWJIvxR0oHuD1zl8G9SBOqDxk/exec"; 
     const STORAGE_KEY = 'seblaksalah_crm_v3';
     let lastActiveUser = null;
 
@@ -88,7 +89,6 @@
         if (!phone) return;
         document.getElementById('statusCloud').innerHTML = "Memanggil database...";
         try {
-            // MENCARI DATA HANYA BERDASARKAN NOMOR HP
             const response = await fetch(`${SPREADSHEET_URL}?phone=${phone}`);
             const data = await response.json();
             if (data && !data.error) {
@@ -120,7 +120,6 @@
         user.name = name; user.dob = dob; user.lastVisit = new Date().toISOString();
         
         db[phone] = user; saveDb(db);
-        // KIRIM DATA LENGKAP TERMASUK CABANG KE SPREADSHEET (APPS SCRIPT AKAN MENG-UPDATE)
         fetch(SPREADSHEET_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ phone, name, points: user.points, dob, amount, branch }) });
 
         lastActiveUser = { phone, ...user };
@@ -134,17 +133,17 @@
     function sapaPelanggan() {
         if (!lastActiveUser) return;
         const pts = lastActiveUser.points;
-        const sisa = lastActiveUser.sisaUang;
-        let infoPoin = pts >= 10 ? `\n🔥 *Hore!* Poin Kakak sudah bisa ditukar dengan menu favorit gratis!\n` : `\n`;
-        const pesan = `Halo Kak ${lastActiveUser.name}! 👋\n\nTerima kasih sudah mampir ke *Seblak Salah*. 😊\n\nSaldo Poin: *${pts} Poin*\nTabungan Sisa: *Rp${sisa}*${infoPoin}\n*Katalog Penukaran Poin:* \n🍹 10 Pts: Es Teh \n🍲 25 Pts: Seblak Lengkap\n\nDitunggu kedatangannya lagi ya kak!`;
+        const infoPoin = pts >= 10 ? `\n🔥 *Hore!* Poin Kakak sudah bisa ditukar dengan menu favorit gratis!\n` : `\n`;
+        const katalog = `*Katalog Penukaran Poin:* \n🍹 10 Pts: Es Teh \n🥟 20 Pts: Dimsum \n🍲 25 Pts: Seblak Lengkap`;
+        const pesan = `Halo Kak ${lastActiveUser.name}! 👋\n\nTerima kasih sudah mampir ke *Seblak Salah*. 😊\n\nSaldo Poin: *${pts} Poin*\nTabungan Sisa: *Rp${lastActiveUser.sisaUang}*${infoPoin}${katalog}\n\nDitunggu kedatangannya lagi ya kak!`;
         window.open(`https://wa.me/${lastActiveUser.phone.replace(/^0/, '62')}?text=${encodeURIComponent(pesan)}`, '_blank');
-        document.getElementById('btnSapa').style.display = 'none';
     }
 
     function refreshDashboards() {
         const db = getDb();
         const listUltah = document.getElementById('listUltah');
-        listUltah.innerHTML = "";
+        const listFollowUp = document.getElementById('listFollowUp');
+        listUltah.innerHTML = ""; listFollowUp.innerHTML = "";
         const today = new Date();
         const tomorrow = new Date(); tomorrow.setDate(today.getDate() + 1);
 
@@ -152,10 +151,14 @@
             const user = db[phone];
             if (user.dob) {
                 const bday = new Date(user.dob);
-                const isToday = bday.getDate() === today.getDate() && bday.getMonth() === today.getMonth();
-                const isTomorrow = bday.getDate() === tomorrow.getDate() && bday.getMonth() === tomorrow.getMonth();
-                if (isToday || isTomorrow) {
-                    listUltah.innerHTML += `<div class="item-row"><div><strong>${user.name}</strong><br><small>${isToday ? 'Hari Ini' : 'Besok'}</small></div><button class="btn" style="width:auto; padding:8px 15px; background:var(--wa); color:white; font-size:0.8rem; margin:0;" onclick="window.open('https://wa.me/${phone.replace(/^0/,'62')}?text=${encodeURIComponent('Halo Kak ' + user.name + '! 👋\\n\\nKami dari *Seblak Salah* ingin mengucapkan *Selamat Ulang Tahun*! 🎂✨\\n\\nSemoga panjang umur, sehat selalu, dan dilancarkan rezekinya. Sebagai kado spesial, Seblak Salah mau *MENTRAKTIR* Kakak 1 Porsi SEBLAK LENGKAP gratis! 😍')}')">Traktir</button></div>`;
+                if ((bday.getDate() === today.getDate() && bday.getMonth() === today.getMonth()) || (bday.getDate() === tomorrow.getDate() && bday.getMonth() === tomorrow.getMonth())) {
+                    listUltah.innerHTML += `<div class="item-row"><div><strong>${user.name}</strong></div><button class="btn" style="width:auto; background:var(--wa); color:white; font-size:0.8rem; padding:8px;" onclick="window.open('https://wa.me/${phone.replace(/^0/,'62')}?text=Selamat Ultah!')">Traktir</button></div>`;
+                }
+            }
+            if (user.lastVisit) {
+                const diffDays = Math.ceil(Math.abs(today - new Date(user.lastVisit)) / (1000 * 60 * 60 * 24));
+                if (diffDays >= 10) {
+                    listFollowUp.innerHTML += `<div class="item-row"><div><strong>${user.name}</strong> (${diffDays} hari)</div><button class="btn" style="width:auto; background:var(--secondary); color:white; font-size:0.8rem; padding:8px;">Sapa</button></div>`;
                 }
             }
         }
@@ -168,11 +171,10 @@
         let db = getDb();
         if (!db[phone] || db[phone].points < cost) return alert("Poin kurang!");
         db[phone].points -= cost; saveDb(db);
-        document.getElementById('statusCloud').innerHTML = `✅ Saldo: ${db[phone].points} Pts | Sisa: Rp${db[phone].sisaUang}`;
         fetch(SPREADSHEET_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ phone, name: db[phone].name, points: db[phone].points, dob: db[phone].dob, amount: 0, branch }) });
         const out = document.getElementById('output');
-        out.style.display = 'block'; out.style.background = '#fef2f2';
-        out.innerHTML = `🎁 <strong>Redeem Berhasil!</strong><br>Sisa: ${db[phone].points} Pts | Lokasi: ${branch}`;
+        out.style.display = 'block';
+        out.innerHTML = `🎁 Redeem Berhasil!<br>Sisa: ${db[phone].points} Pts | Lokasi: ${branch}`;
     }
     window.onload = refreshDashboards;
 </script>
