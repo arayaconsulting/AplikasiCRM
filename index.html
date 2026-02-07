@@ -24,7 +24,7 @@
         .item-row { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-radius: 20px; margin-bottom: 10px; border: 1px solid #edf2f7; background: #fff; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
         .follow-up { background: #fffaf5; border-color: #ffe0b2; }
         .birthday-row { background: #f0f9ff; border-color: #bae6fd; }
-        #branch { border: 2px solid var(--primary); background: #fffcf9; color: var(--primary); }
+        #branch { border: 2px solid var(--primary); background: #fffcf9; color: var(--primary); font-weight: 800; }
         #output { display:none; padding:18px; border-radius:20px; margin-top:15px; font-size:0.95rem; border-left: 6px solid var(--success); background: #f0fdf4; font-weight: 500; }
     </style>
 </head>
@@ -65,7 +65,7 @@
     </div>
 
     <div class="card">
-        <div class="section-header" style="color:var(--birthday);">🎂 Pengingat Ulang TAHUN (H-1)</div>
+        <div class="section-header" style="color:var(--birthday);">🎂 Pengingat Ulang Tahun (H-1)</div>
         <div id="listUltah"></div>
     </div>
 
@@ -76,8 +76,7 @@
 </div>
 
 <script>
-    // URL BARU DARI BAPAK ALI MAHFUD
-    const SPREADSHEET_URL = "https://script.google.com/macros/s/AKfycbxKZcjid7StpjTVBNw9Ik8kJm5fEvB8GGP0lTdLzXgpnMfQUWIAjc43TMJ8SgmaA0ja/exec"; 
+    const SPREADSHEET_URL = "https://script.google.com/macros/s/AKfycbwq9-kvM_qtnWuSz--62XdG6vD0QkIKmC52yyoU51p0nHTVZqm9pSoX97bMbiA6K_mx/exec"; 
     const STORAGE_KEY = 'seblaksalah_crm_v3';
     let lastActiveUser = null;
 
@@ -130,13 +129,14 @@
         db[phone] = user;
         saveDb(db);
         
-        // Simpan ke cloud
+        // Kirim ke Apps Script (Logika Update Baris)
         fetch(SPREADSHEET_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ phone, name, points: user.points, dob, amount, branch }) });
 
         lastActiveUser = { phone, ...user };
         document.getElementById('statusCloud').innerHTML = `✅ Saldo: ${user.points} Pts | Sisa: Rp${user.sisaUang}`;
         const out = document.getElementById('output');
         out.style.display = 'block';
+        out.style.background = '#f0fdf4';
         out.innerHTML = `✅ <strong>Simpan Berhasil!</strong><br>Poin: ${user.points} | Lokasi: ${branch}`;
         document.getElementById('btnSapa').style.display = 'flex';
         document.getElementById('amount').value = "";
