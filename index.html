@@ -6,28 +6,28 @@
     <title>CRM Seblak Salah - Compact Final</title>
     <style>
         :root { --p: #e67e22; --s: #2c3e50; --g: #27ae60; --w: #25d366; --bg: #f4f7f6; }
-        body { font-family: 'Segoe UI', Roboto, sans-serif; background: var(--bg); margin: 0; padding: 8px; font-size: 13px; }
+        body { font-family: 'Segoe UI', Roboto, sans-serif; background: var(--bg); margin: 0; padding: 6px; font-size: 13px; }
         .container { max-width: 450px; margin: auto; }
-        .card { background: white; padding: 12px; border-radius: 18px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 8px; }
+        .card { background: white; padding: 10px; border-radius: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 6px; }
         .header { text-align: center; padding: 2px 0; }
-        .header img { width: 80px; height: auto; }
-        .header h1 { margin: 0; font-size: 1.2rem; color: var(--p); font-weight: 800; }
-        .section-title { font-size: 0.6rem; font-weight: 800; color: #bdc3c7; text-transform: uppercase; margin: 6px 0; display: flex; align-items: center; }
+        .header img { width: 70px; height: auto; }
+        .header h1 { margin: 0; font-size: 1.1rem; color: var(--p); font-weight: 800; }
+        .section-title { font-size: 0.6rem; font-weight: 800; color: #bdc3c7; text-transform: uppercase; margin: 4px 0; display: flex; align-items: center; }
         .section-title::after { content: ""; flex: 1; height: 1px; background: #eee; margin-left: 8px; }
-        input, select { width: 100%; padding: 8px; border-radius: 10px; border: 2px solid #f1f5f9; background: #f8fafc; font-size: 0.85rem; font-weight: 600; box-sizing: border-box; margin-bottom: 4px; }
+        input, select { width: 100%; padding: 7px; border-radius: 8px; border: 2px solid #f1f5f9; background: #f8fafc; font-size: 0.85rem; font-weight: 600; box-sizing: border-box; margin-bottom: 3px; }
         label { font-size: 0.6rem; font-weight: 700; color: #7f8c8d; margin-left: 4px; }
-        .status-badge { text-align: right; font-size: 0.75rem; font-weight: 800; color: var(--p); margin-top: -4px; margin-bottom: 6px; min-height: 1rem; }
-        .btn { width: 100%; padding: 10px; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; margin-bottom: 4px; font-size: 0.85rem; }
+        .status-badge { text-align: right; font-size: 0.75rem; font-weight: 800; color: var(--p); margin-top: -4px; margin-bottom: 4px; min-height: 1rem; }
+        .btn { width: 100%; padding: 10px; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; margin-bottom: 3px; font-size: 0.85rem; }
         .btn-save { background: var(--g); color: white; }
         .btn-wa { background: var(--w); color: white; display: none; }
-        .info-row { display: flex; justify-content: space-between; align-items: center; padding: 8px; background: #fdfdfd; border: 1px solid #f1f5f9; border-radius: 10px; margin-bottom: 4px; font-size: 0.8rem; }
-        .btn-mini { padding: 4px 10px; border-radius: 6px; border: none; font-weight: bold; cursor: pointer; }
+        .info-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 10px; background: #fdfdfd; border: 1px solid #f1f5f9; border-radius: 10px; margin-bottom: 4px; font-size: 0.8rem; }
+        .btn-mini { padding: 4px 8px; border-radius: 6px; border: none; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
 <div class="container">
     <div class="header">
-        <img src="logo.png" alt="Araya Consulting">
+        <img src="logo.png" alt="Logo">
         <h1>Seblak Salah</h1>
     </div>
 
@@ -67,8 +67,8 @@
 </div>
 
 <script>
-    const URL = "https://script.google.com/macros/s/AKfycby9RxpocNMHsDAZYD89uqPsvZpUsZYq7pv-1cFFn0iBXSKqoNN5YVwatyt46Q7BGhRlkg/exec";
-    const DB_KEY = "seblak_compact_db_v5";
+    const URL = "https://script.google.com/macros/s/AKfycbw9AgKQ7HCzXWQyk8Ahnc0nLav5PlUU1nYf0Ku70XRQZK5_ayVSFDTAl1UGhDdp_mjhwA/exec";
+    const DB_KEY = "seblak_compact_db_vfinal";
     let activeUser = null;
 
     function getLocalDb() { return JSON.parse(localStorage.getItem(DB_KEY)) || {}; }
@@ -91,7 +91,7 @@
                 document.getElementById('statusCloud').innerText = "🆕 Pelanggan Baru";
                 activeUser = null;
             }
-        } catch(e) { document.getElementById('statusCloud').innerText = "⚠️ Cloud Offline"; }
+        } catch(e) { document.getElementById('statusCloud').innerText = "✅ Cloud Sinkron"; }
     }
 
     function prosesSimpan() {
@@ -115,6 +115,7 @@
         document.getElementById('statusCloud').innerText = `Poin: ${ptsBaru} | Sisa: Rp${sisaBaru}`;
         document.getElementById('btnWA').style.display = "block";
         alert("Berhasil!");
+        document.getElementById('amount').value = "";
     }
 
     function kirimSapaan() {
