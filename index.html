@@ -3,50 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Seblak Salah CRM - Final Fix</title>
+    <title>Seblak Salah - Compact V5 Final</title>
     <style>
         :root { --p: #e67e22; --s: #2c3e50; --g: #27ae60; --w: #25d366; --bg: #f4f7f6; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 10px; font-size: 13px; }
-        .container { max-width: 450px; margin: auto; }
-        .card { background: white; padding: 12px; border-radius: 18px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 8px; }
-        .header { text-align: center; padding: 2px 0; }
-        .header img { width: 80px; height: auto; }
-        .header h1 { margin: 0; font-size: 1.2rem; color: var(--p); font-weight: 800; }
-        .section-title { font-size: 0.6rem; font-weight: 800; color: #bdc3c7; text-transform: uppercase; margin: 6px 0; display: flex; align-items: center; }
-        .section-title::after { content: ""; flex: 1; height: 1px; background: #eee; margin-left: 8px; }
-        input, select { width: 100%; padding: 8px; border-radius: 10px; border: 2px solid #f1f5f9; background: #f8fafc; font-size: 0.85rem; font-weight: 600; box-sizing: border-box; margin-bottom: 4px; }
-        label { font-size: 0.6rem; font-weight: 700; color: #7f8c8d; margin-left: 4px; }
-        .status-badge { text-align: right; font-size: 0.75rem; font-weight: 800; color: var(--p); margin-top: -4px; margin-bottom: 6px; min-height: 1rem; }
-        .btn { width: 100%; padding: 10px; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; margin-bottom: 4px; font-size: 0.85rem; }
+        .container { max-width: 420px; margin: auto; }
+        .card { background: white; padding: 15px; border-radius: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 10px; }
+        .header { text-align: center; padding: 5px 0; }
+        .header img { width: 90px; }
+        .header h1 { margin: 0; font-size: 1.3rem; color: var(--p); font-weight: 800; }
+        input { width: 100%; padding: 12px; border-radius: 12px; border: 2px solid #f1f5f9; background: #f8fafc; font-size: 0.9rem; font-weight: 600; box-sizing: border-box; margin-bottom: 8px; }
+        label { font-size: 0.65rem; font-weight: 700; color: #7f8c8d; margin-left: 5px; display: block; margin-bottom: 3px; }
+        .status-badge { text-align: right; font-size: 0.8rem; font-weight: 800; color: var(--p); margin-top: -5px; margin-bottom: 10px; min-height: 1rem; }
+        .btn { width: 100%; padding: 14px; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; margin-bottom: 8px; font-size: 0.9rem; }
         .btn-save { background: var(--g); color: white; }
         .btn-wa { background: var(--w); color: white; display: none; }
-        .info-row { display: flex; justify-content: space-between; align-items: center; padding: 8px; background: #fdfdfd; border: 1px solid #f1f5f9; border-radius: 10px; margin-bottom: 4px; font-size: 0.8rem; }
+        .info-row { display: flex; justify-content: space-between; align-items: center; padding: 10px; background: #fdfdfd; border: 1px solid #f1f5f9; border-radius: 12px; margin-bottom: 5px; font-size: 0.85rem; }
+        hr { border: 0; border-top: 1px solid #eee; margin: 10px 0; }
     </style>
 </head>
 <body>
 <div class="container">
-    <div class="header">
-        <img src="logo.png" alt="Logo">
-        <h1>Seblak Salah</h1>
-    </div>
+    <div class="header"><img src="logo.png" alt="Logo"><h1>Seblak Salah</h1></div>
     <div class="card">
-        <select id="branch">
-            <option value="Cabang Pahlawan">📍 Cabang Pahlawan</option>
-            <option value="Cabang Mondokan">📍 Cabang Mondokan</option>
-            <option value="Mitra Merakurak">🤝 Mitra Merakurak</option>
-            <option value="Mitra Jenu">🤝 Mitra Jenu</option>
-        </select>
-        <div class="section-title">Pelanggan</div>
-        <input type="tel" id="phone" placeholder="Nomor WA (08...)" onblur="cekDatabase()">
+        <label>📍 Keterangan Cabang (Ketik Manual)</label>
+        <input type="text" id="branch" placeholder="Contoh: Pahlawan / Jenu">
+        
+        <label>📱 No. WhatsApp</label>
+        <input type="tel" id="phone" placeholder="WhatsApp (0856...)" onblur="cekDatabase()">
         <div id="statusCloud" class="status-badge"></div>
+        
         <input type="text" id="name" placeholder="Nama Pelanggan">
         <label>Tanggal Lahir</label>
         <input type="date" id="dob">
         <input type="number" id="amount" placeholder="Nominal Belanja (Rp)">
+        
         <button class="btn btn-save" onclick="prosesSimpan()">Simpan Transaksi</button>
         <button id="btnWA" class="btn btn-wa" onclick="kirimSapaan()">💬 Kirim WhatsApp</button>
-        <div class="section-title">Redeem</div>
-        <select id="reward">
+        
+        <hr>
+        <label>🎁 Tukar Poin</label>
+        <select id="reward" style="width:100%; padding:12px; border-radius:12px; border:2px solid #f1f5f9; background:#f8fafc; font-weight:600; margin-bottom:8px;">
             <option value="10">Es Teh Manis (10 Pts)</option>
             <option value="20">Dimsum (20 Pts)</option>
             <option value="25">Seblak Lengkap (25 Pts)</option>
@@ -54,13 +51,15 @@
         <button class="btn" style="background:var(--s); color:white;" onclick="prosesRedeem()">Tukarkan Poin</button>
     </div>
     <div class="card">
-        <div class="section-title" style="color:#3498db;">📢 Notifikasi CRM</div>
+        <label style="color:#3498db; font-weight:bold;">📢 Notifikasi CRM</label>
         <div id="listDash"></div>
     </div>
 </div>
+
 <script>
-    const URL = "https://script.google.com/macros/s/AKfycbzwTnk5s5Ss5J6k0lhbPXpnGHU_xDIalBTulCoSqoRz3TQuL_i_gSlwlmyw4FZhOF7Q8w/exec";
-    const DB_KEY = "seblak_compact_db_vfinal_fix";
+    // URL TERBARU PAK ALI
+    const URL = "https://script.google.com/macros/s/AKfycbyHWmwudJdsW2Q2wiA-DYjBABBqALgnHkYB-Ub03IiIyUYQX6P_hHZ5CXwLcnUnhL3I/exec";
+    const DB_KEY = "seblak_v5_manual_branch";
     let activeUser = null;
 
     function getLocalDb() { return JSON.parse(localStorage.getItem(DB_KEY)) || {}; }
@@ -75,15 +74,15 @@
             const data = await res.json();
             if(!data.error) {
                 document.getElementById('name').value = data.name;
-                if(data.dob) document.getElementById('dob').value = data.dob.split('T')[0];
+                if(data.dob) document.getElementById('dob').value = data.dob;
                 document.getElementById('statusCloud').innerText = `✅ Poin: ${data.points} | Sisa: Rp${data.sisaUang}`;
                 activeUser = { phone, ...data };
                 let db = getLocalDb(); db[phone] = activeUser; setLocalDb(db);
             } else {
-                document.getElementById('statusCloud').innerText = "🆕 Pelanggan Baru";
+                document.getElementById('statusCloud').innerText = "ℹ️ Pelanggan Baru";
                 activeUser = null;
             }
-        } catch(e) { document.getElementById('statusCloud').innerText = "⚠️ Cloud Offline"; }
+        } catch(e) { document.getElementById('statusCloud').innerText = "⚠️ Cloud Error"; }
     }
 
     function prosesSimpan() {
@@ -101,17 +100,12 @@
         let sisaBaru = total % 10000;
 
         activeUser = { phone, name, dob, points: ptsBaru, sisaUang: sisaBaru, branch, lastVisit: new Date().toISOString() };
-        
-        // Kirim POST ke cloud
         fetch(URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(activeUser) });
         
-        // Simpan ke iPad lokal agar notifikasi langsung update
         let db = getLocalDb(); db[phone] = activeUser; setLocalDb(db);
-        
         document.getElementById('statusCloud').innerText = `✅ Poin: ${ptsBaru} | Sisa: Rp${sisaBaru}`;
         document.getElementById('btnWA').style.display = "block";
-        alert("Berhasil!");
-        document.getElementById('amount').value = "";
+        alert("Simpan Berhasil!");
     }
 
     function kirimSapaan() {
@@ -131,7 +125,6 @@
 
         for (let k in db) {
             const u = db[k];
-            // NOTIFIKASI ULTAH IDEAL
             if(u.dob) {
                 const d = new Date(u.dob);
                 if((d.getDate()==today.getDate() && d.getMonth()==today.getMonth()) || (d.getDate()==tomorrow.getDate() && d.getMonth()==tomorrow.getMonth())) {
@@ -139,12 +132,11 @@
                     dash.innerHTML += `<div class="info-row"><span>🎂 ${u.name} (Ultah)</span><button style="border:none;background:var(--w);color:white;border-radius:6px;padding:4px 10px;" onclick="window.open('https://wa.me/${u.phone.replace(/^0/,'62')}?text=${encodeURIComponent(msgU)}')">🎁</button></div>`;
                 }
             }
-            // NOTIFIKASI 10 HARI (RINDU)
             if(u.lastVisit) {
                 const diff = Math.floor((today - new Date(u.lastVisit)) / (1000*60*60*24));
                 if(diff >= 10) {
                     const msgR = `Selamat Siang, apa kabarnya Kak ${u.name}? 👋\n\nSemoga Kakak sehat dan bahagia selalu ya. Di *Seblak Salah*, kami tiba-tiba teringat Kakak karena sudah ${diff} hari Kakak tidak mampir ke sini. ✨\n\nYuk, sempatkan mampir lagi. Kami tunggu ya Kak!`;
-                    dash.innerHTML += `<div class="info-row"><span>😢 ${u.name} (${diff} hr)</span><button style="border:none;background:var(--s);color:white;border-radius:6px;padding:4px 10px;" onclick="window.open('https://wa.me/${u.phone.replace(/^0/,'62')}?text=${encodeURIComponent(msgR)}')">💬</button></div>`;
+                    dash.innerHTML += `<div class="info-row"><span>😢 ${u.name} (${diff} hari)</span><button style="border:none;background:var(--s);color:white;border-radius:6px;padding:4px 10px;" onclick="window.open('https://wa.me/${u.phone.replace(/^0/,'62')}?text=${encodeURIComponent(msgR)}')">💬</button></div>`;
                 }
             }
         }
