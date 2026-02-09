@@ -9,7 +9,7 @@
         body { font-family: 'Segoe UI', Roboto, sans-serif; background: var(--bg); margin: 0; padding: 15px; color: #333; }
         .container { max-width: 500px; margin: auto; }
         .branding { text-align: center; margin-bottom: 25px; }
-        .branding img { width: 120px; height: auto; margin-bottom: 5px; display: block; margin-left: auto; margin-right: auto; border-radius: 10px; }
+        .branding img { width: 140px; height: auto; margin-bottom: 5px; display: block; margin-left: auto; margin-right: auto; }
         .branding h1 { font-size: 1.6rem; color: var(--primary); margin: 0; font-weight: 800; }
         .branding p { font-size: 0.8rem; color: #7f8c8d; margin: 2px 0; text-transform: uppercase; letter-spacing: 1px; }
         .card { background: var(--card); padding: 20px; border-radius: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); border: 1px solid #edf2f7; margin-bottom: 15px; }
@@ -36,7 +36,7 @@
 
 <div class="container">
     <div class="branding">
-        <img src="logo.png" alt="Logo Seblak Salah"> 
+        <img src="https://arayaconsulting.github.io/logo.png" onerror="this.src='logo.png'" alt="Araya Consulting">
         <h1>Seblak Salah</h1>
         <p>LOYALTY PROGRAM MANAGEMENT</p>
     </div>
@@ -84,7 +84,7 @@
     </div>
 
     <div class="card">
-        <div class="section-header">🚪 FOLLOW-UP (≥ 10 HARI)</div>
+        <div class="section-header">🚪 DASHBOARD FOLLOW-UP (≥ 10 HARI)</div>
         <div id="listFollowUp"></div>
     </div>
 
@@ -92,6 +92,7 @@
 </div>
 
 <script>
+    // URL diperbaiki (memastikan tidak ada karakter terputus)
     const SPREADSHEET_URL = "https://script.google.com/macros/s/AKfycbLzqYz56ANEfQCXbk4aNK0L3-1Jo39oLLS8d-uGq0C-llYaNIzh2vFc4f5Eq433EU4/exec"; 
     const STORAGE_KEY = 'seblaksalah_crm_v4';
     let lastActiveUser = null;
