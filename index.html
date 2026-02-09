@@ -84,7 +84,7 @@
     </div>
 
     <div class="card">
-        <div class="section-header">🚪 FOLLOW-UP (≥ 10 HARI)</div>
+        <div class="section-header">🚪 DASHBOARD FOLLOW-UP (≥ 10 HARI)</div>
         <div id="listFollowUp"></div>
     </div>
 
@@ -205,8 +205,8 @@
         const pts = lastActiveUser.points;
         const sisa = lastActiveUser.sisaUang;
         const cabang = lastActiveUser.branch;
-        let infoPoin = pts >= 10 ? `\n🔥 *Hore!* Poin Kakak sudah bisa ditukar dengan menu favorit gratis!\n` : `\n`;
         
+        let infoPoin = pts >= 10 ? `\n🔥 *Hore!* Poin Kakak sudah bisa ditukar dengan menu favorit gratis!\n` : `\n`;
         const katalog = `*Katalog Penukaran Poin:* \n🍹 10 Pts: Es Teh \n🥟 20 Pts: Dimsum \n🍲 25 Pts: Seblak Lengkap`;
         
         const pesan = `Halo Kak ${lastActiveUser.name}! 👋\n\nTerima kasih sudah mampir ke *Seblak Salah (${cabang})*. 😊\n\nSaldo Poin: *${pts} Poin*\nTabungan Sisa: *Rp${sisa}*${infoPoin}${katalog}\n\n_Kumpulkan terus poinnya dan nikmati reward spesial dari kami!_\n\nDitunggu kedatangannya lagi ya kak!`;
@@ -221,6 +221,17 @@
         if (jam < 15) return "Selamat Siang";
         if (jam < 18) return "Selamat Sore";
         return "Selamat Malam";
+    }
+
+    function kirimUltah(phone, nama) {
+        const pesan = `Halo Kak ${nama}! 👋\n\nKami dari *Seblak Salah* ingin mengucapkan *Selamat Ulang Tahun*! 🎂✨\n\nSemoga panjang umur, sehat selalu, dan dilancarkan rezekinya. Sebagai kado spesial, Seblak Salah mau *MENTRAKTIR* Kakak 1 Porsi SEBLAK LENGKAP gratis! 😍\n\nSyaratnya cukup tunjukkan WA ini dan kartu identitas ke kasir. Khusus makan di tempat ya Kak. Ditunggu kedatangannya! 🍲✨`;
+        window.open(`https://wa.me/${phone.replace(/^0/, '62')}?text=${encodeURIComponent(pesan)}`, '_blank');
+    }
+
+    function kirimRindu(phone, nama, poin, hari) {
+        const sapaanWaktu = getSapaanWaktu();
+        const pesan = `${sapaanWaktu}, apa kabarnya Kak ${nama}? 👋\n\nSemoga Kakak sehat dan bahagia selalu ya. Di *Seblak Salah*, kami tiba-tiba teringat Kakak karena sudah ${hari} hari Kakak tidak mampir ke sini. ✨\n\nRasanya ada yang kurang kalau meja favorit Kakak kosong terlalu lama. Oh iya, Kakak masih punya tabungan *${poin} Poin* loh, sayang banget kalau tidak dimanfaatkan. 😊\n\nYuk, sempatkan mampir lagi. Kami tunggu ya Kak untuk melepas rindu dengan aroma kencur dan pedas khas Seblak Salah! 🍲✨`;
+        window.open(`https://wa.me/${phone.replace(/^0/, '62')}?text=${encodeURIComponent(pesan)}`, '_blank');
     }
 
     function refreshDashboards() {
@@ -254,17 +265,6 @@
                 }
             }
         }
-    }
-
-    function kirimUltah(phone, nama) {
-        const pesan = `Halo Kak ${nama}! 👋\n\nKami dari *Seblak Salah* ingin mengucapkan *Selamat Ulang Tahun*! 🎂✨\n\nSemoga panjang umur, sehat selalu, dan dilancarkan rezekinya. Sebagai kado spesial, Seblak Salah mau *MENTRAKTIR* Kakak 1 Porsi SEBLAK LENGKAP gratis! 😍\n\nSyaratnya cukup tunjukkan WA ini dan kartu identitas ke kasir. Khusus makan di tempat ya Kak. Ditunggu kedatangannya! 🍲✨`;
-        window.open(`https://wa.me/${phone.replace(/^0/, '62')}?text=${encodeURIComponent(pesan)}`, '_blank');
-    }
-
-    function kirimRindu(phone, nama, poin, hari) {
-        const sapaanWaktu = getSapaanWaktu();
-        const pesan = `${sapaanWaktu}, apa kabarnya Kak ${nama}? 👋\n\nSemoga Kakak sehat dan bahagia selalu ya. Di *Seblak Salah*, kami tiba-tiba teringat Kakak karena sudah ${hari} hari Kakak tidak mampir ke sini. ✨\n\nRasanya ada yang kurang kalau meja favorit Kakak kosong terlalu lama. Oh iya, Kakak masih punya tabungan *${poin} Poin* loh, sayang banget kalau tidak dimanfaatkan. 😊\n\nYuk, sempatkan mampir lagi. Kami tunggu ya Kak untuk melepas rindu dengan aroma kencur dan pedas khas Seblak Salah! 🍲✨`;
-        window.open(`https://wa.me/${phone.replace(/^0/, '62')}?text=${encodeURIComponent(pesan)}`, '_blank');
     }
 
     function redeemPoin() {
