@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CRM Seblak Salah - Versi Final Stabil</title>
+    <title>Seblak Salah CRM - Final Stable</title>
     <style>
         :root { --p: #e67e22; --s: #2c3e50; --g: #27ae60; --w: #25d366; --bg: #f4f7f6; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 10px; font-size: 13px; }
@@ -45,7 +45,7 @@
         <div id="statusCloud" class="status-badge"></div>
         
         <input type="text" id="name" placeholder="Nama Pelanggan">
-        <label>Tanggal Lahir</label>
+        <label>Tanggal Lahir (Opsional)</label>
         <input type="date" id="dob">
         <input type="number" id="amount" placeholder="Nominal Belanja (Rp)">
         
@@ -70,9 +70,8 @@
 </div>
 
 <script>
-    // URL Deployment Terbaru Pak Ali
-    const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbzJswIydFd-8Msf863pyvLbXDGgmiiwVTMCmymneNc024DeFBGAWw0aEzXqXXUp2DTZ/exec"; 
-    const DB_KEY = "seblak_final_fix_match_v15_stable";
+    const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbwFPWl6HLL0VghAS4ITVUaBrBCVWFS7wuKEAARjDyPQX3PYZIUsJ_SIJ7Lyt1P3LvUQ/exec"; 
+    const DB_KEY = "seblak_final_fix_v16";
     let activeUser = null;
 
     function getLocalDb() { return JSON.parse(localStorage.getItem(DB_KEY)) || {}; }
@@ -97,14 +96,16 @@
                 if(data.dob) document.getElementById('dob').value = data.dob;
                 updatePointUI(data.points, data.sisaUang);
                 activeUser = { phone, ...data };
+                document.getElementById('btnWA').style.display = "block";
                 let db = getLocalDb(); db[phone] = activeUser; setLocalDb(db);
             } else {
                 document.getElementById('statusCloud').innerText = "🆕 Pelanggan Baru";
                 document.getElementById('statusRedeem').innerText = "Saldo Poin: 0 Pts";
+                document.getElementById('btnWA').style.display = "none";
                 activeUser = null;
             }
         } catch(e) { 
-            document.getElementById('statusCloud').innerText = "⚠️ Periksa Deployment Apps Script"; 
+            document.getElementById('statusCloud').innerText = "⚠️ Cloud Koneksi"; 
         }
     }
 
@@ -118,25 +119,23 @@
         
         if(!phone || !name) return alert("Nomor WA dan Nama wajib diisi!");
 
-        let curPts = activeUser ? parseInt(activeUser.points) : 0;
         let curSisa = activeUser ? parseInt(activeUser.sisaUang) : 0;
         let total = curSisa + amount;
-        let ptsBaru = curPts + Math.floor(total / 10000);
+        let ptsBaru = Math.floor(total / 10000);
         let sisaBaru = total % 10000;
 
-        activeUser = { phone, name, dob, points: ptsBaru, sisaUang: sisaBaru, branch, lastVisit: new Date().toISOString() };
+        let dataKirim = { phone, name, dob, points: ptsBaru, sisaUang: sisaBaru, branch };
         
-        document.getElementById('statusCloud').innerText = "⏳ Sinkronisasi Cloud...";
-        
+        document.getElementById('statusCloud').innerText = "⏳ Menyimpan...";
         try {
-            await fetch(URL_SCRIPT, { method: 'POST', body: JSON.stringify(activeUser) });
-            let db = getLocalDb(); db[phone] = activeUser; setLocalDb(db);
-            updatePointUI(ptsBaru, sisaBaru);
-            document.getElementById('btnWA').style.display = "block";
-            alert("LANCAR JAYA! Data Berhasil Disimpan.");
-            document.getElementById('amount').value = "";
+            await fetch(URL_SCRIPT, { method: 'POST', body: JSON.stringify(dataKirim) });
+            alert("LANCAR JAYA! Data Tersimpan.");
+            let db = getLocalDb(); 
+            db[phone] = { ...dataKirim, lastVisit: new Date().toISOString() };
+            setLocalDb(db);
+            location.reload(); 
         } catch (e) {
-            alert("Gagal Sinkron ke Cloud. Cek URL Deployment Anda.");
+            alert("Gagal Sinkron. Cek Apps Script.");
         }
     }
 
@@ -145,17 +144,15 @@
         if(!activeUser) return alert("Cari data pelanggan dulu!");
         if(activeUser.points < cost) return alert("Poin tidak cukup!");
 
-        activeUser.points -= cost;
-        activeUser.lastVisit = new Date().toISOString();
+        let dataKirim = { ...activeUser, points: -cost, lastVisit: new Date().toISOString() };
 
-        document.getElementById('statusCloud').innerText = "⏳ Update Poin Cloud...";
+        document.getElementById('statusCloud').innerText = "⏳ Update Poin...";
         try {
-            await fetch(URL_SCRIPT, { method: 'POST', body: JSON.stringify(activeUser) });
-            let db = getLocalDb(); db[activeUser.phone] = activeUser; setLocalDb(db);
-            updatePointUI(activeUser.points, activeUser.sisaUang);
-            alert("Redeem Berhasil! Poin di Cloud otomatis berkurang.");
+            await fetch(URL_SCRIPT, { method: 'POST', body: JSON.stringify(dataKirim) });
+            alert("Redeem Berhasil!");
+            location.reload();
         } catch (e) {
-            alert("Gagal update redeem ke cloud.");
+            alert("Gagal update redeem.");
         }
     }
 
@@ -178,7 +175,7 @@
             if(u.dob) {
                 const d = new Date(u.dob);
                 if((d.getDate()==today.getDate() && d.getMonth()==today.getMonth()) || (d.getDate()==tomorrow.getDate() && d.getMonth()==tomorrow.getMonth())) {
-                    const msgU = `Halo Kak ${u.name}! 👋\n\nSelamat Ulang Tahun! 🎂✨ Seblak Salah mau *MENTRAKTIR* Kakak 1 Porsi SEBLAK LENGKAP gratis! 😍 Cukup tunjukkan WA ini ke kasir ya Kak.`;
+                    const msgU = `Halo Kak ${u.name}! 👋 Selamat Ulang Tahun! 🎂✨ Seblak Salah mau *MENTRAKTIR* Kakak 1 Porsi SEBLAK LENGKAP gratis! 😍 Cukup tunjukkan WA ini ke kasir ya Kak.`;
                     dash.innerHTML += `<div class="info-row"><span>🎂 ${u.name} (Ultah)</span><button style="border:none;background:var(--w);color:white;border-radius:8px;padding:5px 10px;font-weight:bold;" onclick="window.open('https://wa.me/${u.phone.replace(/^0/,'62')}?text=${encodeURIComponent(msgU)}')">🎁</button></div>`;
                 }
             }
