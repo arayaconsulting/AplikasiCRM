@@ -8,9 +8,10 @@
         :root { --primary: #e67e22; --secondary: #2c3e50; --success: #27ae60; --wa: #25d366; --birthday: #3498db; --bg: #f4f7f6; --card: #ffffff; }
         body { font-family: 'Segoe UI', Roboto, sans-serif; background: var(--bg); margin: 0; padding: 15px; color: #333; }
         .container { max-width: 500px; margin: auto; }
-        .branding { text-align: center; margin-bottom: 25px; padding-top: 20px; }
-        .branding h1 { font-size: 1.8rem; color: var(--primary); margin: 0; font-weight: 800; }
-        .branding p { font-size: 0.85rem; color: #7f8c8d; margin: 2px 0; text-transform: uppercase; letter-spacing: 1px; font-weight: bold; }
+        .branding { text-align: center; margin-bottom: 25px; }
+        .branding img { width: 140px; height: auto; margin-bottom: 5px; display: block; margin-left: auto; margin-right: auto; }
+        .branding h1 { font-size: 1.6rem; color: var(--primary); margin: 0; font-weight: 800; }
+        .branding p { font-size: 0.8rem; color: #7f8c8d; margin: 2px 0; text-transform: uppercase; letter-spacing: 1px; }
         .card { background: var(--card); padding: 20px; border-radius: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); border: 1px solid #edf2f7; margin-bottom: 15px; }
         .section-header { font-size: 0.7rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin: 20px 0 10px 0; display: flex; align-items: center; letter-spacing: 0.5px; }
         .section-header::after { content: ""; flex: 1; height: 1px; background: #e2e8f0; margin-left: 10px; }
@@ -35,6 +36,7 @@
 
 <div class="container">
     <div class="branding">
+        <img src="https://arayaconsulting.github.io/logo.png" onerror="this.src='https://via.placeholder.com/140x60?text=Logo+Araya'" alt="Logo Araya Consulting"> 
         <h1>Seblak Salah</h1>
         <p>LOYALTY PROGRAM MANAGEMENT</p>
     </div>
@@ -90,7 +92,7 @@
 </div>
 
 <script>
-    const SPREADSHEET_URL = "https://script.google.com/macros/s/AKfycbLzqYz56ANEfQCXbk4aNK0L3-1Jo39oLLS8d-uGq0C-llYaNIzh2vFc4f5Eq433EU4/exec"; 
+    const SPREADSHEET_URL = "https://script.google.com/macros/s/AKfycbzEyVJE7M83b5qYO-h7C282JyeR-thbHNPChKkRx7q_xpjMXHovX6qVDd-FLuSmww6N/exec"; 
     const STORAGE_KEY = 'seblaksalah_crm_v4';
     let lastActiveUser = null;
 
