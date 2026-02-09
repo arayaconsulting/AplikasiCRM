@@ -9,7 +9,7 @@
         body { font-family: 'Segoe UI', Roboto, sans-serif; background: var(--bg); margin: 0; padding: 15px; color: #333; }
         .container { max-width: 500px; margin: auto; }
         .branding { text-align: center; margin-bottom: 25px; }
-        .branding img { width: 120px; height: auto; margin-bottom: 5px; display: block; margin-left: auto; margin-right: auto; border-radius: 10px; }
+        .branding img { width: 140px; height: auto; margin-bottom: 5px; display: block; margin-left: auto; margin-right: auto; }
         .branding h1 { font-size: 1.6rem; color: var(--primary); margin: 0; font-weight: 800; }
         .branding p { font-size: 0.8rem; color: #7f8c8d; margin: 2px 0; text-transform: uppercase; letter-spacing: 1px; }
         .card { background: var(--card); padding: 20px; border-radius: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); border: 1px solid #edf2f7; margin-bottom: 15px; }
@@ -36,7 +36,8 @@
 
 <div class="container">
     <div class="branding">
-        <img src="https://via.placeholder.com/150" alt="Logo"> <h1>Seblak Salah</h1>
+        <img src="https://arayaconsulting.github.io/logo.png" onerror="this.src='https://via.placeholder.com/140x60?text=Araya+Consulting'" alt="Araya Consulting">
+        <h1>Seblak Salah</h1>
         <p>LOYALTY PROGRAM MANAGEMENT</p>
     </div>
 
@@ -55,10 +56,10 @@
         
         <label>Pilih Cabang / Mitra</label>
         <select id="branch">
-            <option value="Pusat">Pusat (Tuban)</option>
-            <option value="Cabang Tuban 2">Cabang Tuban 2</option>
-            <option value="Cabang Surabaya">Cabang Surabaya</option>
-            <option value="Mitra Gresik">Mitra Gresik</option>
+            <option value="Cabang Pahlawan">Cabang Pahlawan</option>
+            <option value="Cabang Mondokan">Cabang Mondokan</option>
+            <option value="Mitra Merakurak">Mitra Merakurak</option>
+            <option value="Mitra Jenu">Mitra Jenu</option>
         </select>
 
         <label>Nominal Belanja (Rp)</label>
@@ -83,7 +84,7 @@
     </div>
 
     <div class="card">
-        <div class="section-header">🚪 FOLLOW-UP (≥ 10 HARI)</div>
+        <div class="section-header">🚪 DASHBOARD FOLLOW-UP (≥ 10 HARI)</div>
         <div id="listFollowUp"></div>
     </div>
 
@@ -91,7 +92,7 @@
 </div>
 
 <script>
-    const SPREADSHEET_URL = "https://script.google.com/macros/s/AKfycbwLzqYz56ANEfQCXbk4aNK0L3-1Jo39oLLS8d-uGq0C-llYaNIzh2vFc4f5Eq433EU4/exec"; 
+    const SPREADSHEET_URL = "https://script.google.com/macros/s/AKfycbLzqYz56ANEfQCXbk4aNK0L3-1Jo39oLLS8d-uGq0C-llYaNIzh2vFc4f5Eq433EU4/exec"; 
     const STORAGE_KEY = 'seblaksalah_crm_v4';
     let lastActiveUser = null;
 
@@ -125,7 +126,7 @@
                     lastVisit: data.lastVisit, 
                     dob: data.dob, 
                     sisaUang: data.sisaUang || 0,
-                    branch: data.branch || "Pusat"
+                    branch: data.branch || "Cabang Pahlawan"
                 };
                 saveDb(db);
                 updateStatusUI(data.points, data.sisaUang);
@@ -204,12 +205,33 @@
         const pts = lastActiveUser.points;
         const sisa = lastActiveUser.sisaUang;
         const cabang = lastActiveUser.branch;
-        let infoPoin = pts >= 10 ? `\n🔥 *Hore!* Poin Kakak sudah bisa ditukar dengan menu favorit gratis!\n` : `\n`;
         
-        const pesan = `Halo Kak ${lastActiveUser.name}! 👋\n\nTerima kasih sudah mampir ke *Seblak Salah (${cabang})*. 😊\n\nSaldo Poin: *${pts} Poin*\nTabungan Sisa: *Rp${sisa}*${infoPoin}\n_Kumpulkan terus poinnya dan nikmati reward spesial dari kami!_\n\nDitunggu kedatangannya lagi ya kak!`;
+        let infoPoin = pts >= 10 ? `\n🔥 *Hore!* Poin Kakak sudah bisa ditukar dengan menu favorit gratis!\n` : `\n`;
+        const katalog = `*Katalog Penukaran Poin:* \n🍹 10 Pts: Es Teh \n🥟 20 Pts: Dimsum \n🍲 25 Pts: Seblak Lengkap`;
+        
+        const pesan = `Halo Kak ${lastActiveUser.name}! 👋\n\nTerima kasih sudah mampir ke *Seblak Salah (${cabang})*. 😊\n\nSaldo Poin: *${pts} Poin*\nTabungan Sisa: *Rp${sisa}*${infoPoin}${katalog}\n\n_Kumpulkan terus poinnya dan nikmati reward spesial dari kami!_\n\nDitunggu kedatangannya lagi ya kak!`;
         
         window.open(`https://wa.me/${lastActiveUser.phone.replace(/^0/, '62')}?text=${encodeURIComponent(pesan)}`, '_blank');
         document.getElementById('btnSapa').style.display = 'none';
+    }
+
+    function getSapaanWaktu() {
+        const jam = new Date().getHours();
+        if (jam < 11) return "Selamat Pagi";
+        if (jam < 15) return "Selamat Siang";
+        if (jam < 18) return "Selamat Sore";
+        return "Selamat Malam";
+    }
+
+    function kirimUltah(phone, nama) {
+        const pesan = `Halo Kak ${nama}! 👋\n\nKami dari *Seblak Salah* ingin mengucapkan *Selamat Ulang Tahun*! 🎂✨\n\nSemoga panjang umur, sehat selalu, dan dilancarkan rezekinya. Sebagai kado spesial, Seblak Salah mau *MENTRAKTIR* Kakak 1 Porsi SEBLAK LENGKAP gratis! 😍\n\nSyaratnya cukup tunjukkan WA ini dan kartu identitas ke kasir. Khusus makan di tempat ya Kak. Ditunggu kedatangannya! 🍲✨`;
+        window.open(`https://wa.me/${phone.replace(/^0/, '62')}?text=${encodeURIComponent(pesan)}`, '_blank');
+    }
+
+    function kirimRindu(phone, nama, poin, hari) {
+        const sapaanWaktu = getSapaanWaktu();
+        const pesan = `${sapaanWaktu}, apa kabarnya Kak ${nama}? 👋\n\nSemoga Kakak sehat dan bahagia selalu ya. Di *Seblak Salah*, kami tiba-tiba teringat Kakak karena sudah ${hari} hari Kakak tidak mampir ke sini. ✨\n\nRasanya ada yang kurang kalau meja favorit Kakak kosong terlalu lama. Oh iya, Kakak masih punya tabungan *${poin} Poin* loh, sayang banget kalau tidak dimanfaatkan. 😊\n\nYuk, sempatkan mampir lagi. Kami tunggu ya Kak untuk melepas rindu dengan aroma kencur dan pedas khas Seblak Salah! 🍲✨`;
+        window.open(`https://wa.me/${phone.replace(/^0/, '62')}?text=${encodeURIComponent(pesan)}`, '_blank');
     }
 
     function refreshDashboards() {
@@ -243,16 +265,6 @@
                 }
             }
         }
-    }
-
-    function kirimUltah(phone, nama) {
-        const pesan = `Halo Kak ${nama}! 👋\n\nKami dari *Seblak Salah* ingin mengucapkan *Selamat Ulang Tahun*! 🎂✨\n\nSebagai kado spesial, kami ingin *MENTRAKTIR* Kakak 1 Porsi SEBLAK LENGKAP gratis! 😍\n\nCukup tunjukkan WA ini di cabang terdekat. Ditunggu kedatangannya! 🍲`;
-        window.open(`https://wa.me/${phone.replace(/^0/, '62')}?text=${encodeURIComponent(pesan)}`, '_blank');
-    }
-
-    function kirimRindu(phone, nama, poin, hari) {
-        const pesan = `Halo Kak ${nama}? 👋\n\nSudah ${hari} hari Kakak tidak mampir ke *Seblak Salah*. Kami rindu nih! ✨\n\nKakak masih punya *${poin} Poin* loh. Yuk mampir lagi dan gunakan poinnya! 😊`;
-        window.open(`https://wa.me/${phone.replace(/^0/, '62')}?text=${encodeURIComponent(pesan)}`, '_blank');
     }
 
     function redeemPoin() {
