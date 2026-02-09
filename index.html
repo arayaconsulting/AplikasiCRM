@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Seblak Salah CRM - Final Sync</title>
+    <title>CRM Seblak Salah - Koneksi Stabil</title>
     <style>
         :root { --p: #e67e22; --s: #2c3e50; --g: #27ae60; --w: #25d366; --bg: #f4f7f6; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 10px; font-size: 13px; }
@@ -71,8 +71,8 @@
 
 <script>
     // URL Deployment Terbaru Pak Ali
-    const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbzwTnk5s5Ss5J6k0lhbPXpnGHU_xDIalBTulCoSqoRz3TQuL_i_gSlwlmyw4FZhOF7Q8w/exec"; 
-    const DB_KEY = "seblak_final_sync_v10";
+    const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbyAbaCXI_ilWTtc7lCvs31GCxMPGDXDMw2OeWx561WmyVgq_R84qpwgve_ikdXgPftQ/exec"; 
+    const DB_KEY = "seblak_final_sync_v11_stable";
     let activeUser = null;
 
     function getLocalDb() { return JSON.parse(localStorage.getItem(DB_KEY)) || {}; }
@@ -81,6 +81,19 @@
     function updatePointUI(pts, sisa) {
         document.getElementById('statusCloud').innerText = `Saldo: ${pts} Pts | Sisa: Rp${sisa}`;
         document.getElementById('statusRedeem').innerText = `Saldo Poin: ${pts} Pts`;
+    }
+
+    async function kirimKeCloud(userData) {
+        try {
+            const response = await fetch(URL_SCRIPT, {
+                method: 'POST',
+                body: JSON.stringify(userData)
+            });
+            return await response.text();
+        } catch (e) {
+            console.error("Cloud Error:", e);
+            return "Error";
+        }
     }
 
     async function cekDatabase() {
@@ -124,12 +137,14 @@
 
         activeUser = { phone, name, dob, points: ptsBaru, sisaUang: sisaBaru, branch, lastVisit: new Date().toISOString() };
         
-        await fetch(URL_SCRIPT, { method: 'POST', mode: 'no-cors', body: JSON.stringify(activeUser) });
+        // Kirim & Tunggu Respon Cloud
+        document.getElementById('statusCloud').innerText = "⏳ Menyimpan ke Cloud...";
+        await kirimKeCloud(activeUser);
         
         let db = getLocalDb(); db[phone] = activeUser; setLocalDb(db);
         updatePointUI(ptsBaru, sisaBaru);
         document.getElementById('btnWA').style.display = "block";
-        alert("Berhasil Simpan!");
+        alert("Berhasil! Data telah tercatat di Spreadsheet.");
         document.getElementById('amount').value = "";
     }
 
@@ -141,11 +156,12 @@
         activeUser.points -= cost;
         activeUser.lastVisit = new Date().toISOString();
 
-        await fetch(URL_SCRIPT, { method: 'POST', mode: 'no-cors', body: JSON.stringify(activeUser) });
+        document.getElementById('statusCloud').innerText = "⏳ Memperbarui Cloud...";
+        await kirimKeCloud(activeUser);
         
         let db = getLocalDb(); db[activeUser.phone] = activeUser; setLocalDb(db);
         updatePointUI(activeUser.points, activeUser.sisaUang);
-        alert("Redeem Berhasil! Poin di Spreadsheet telah diperbarui.");
+        alert("Redeem Berhasil! Data di Spreadsheet telah diperbarui.");
     }
 
     function kirimSapaan() {
@@ -167,7 +183,7 @@
             if(u.dob) {
                 const d = new Date(u.dob);
                 if((d.getDate()==today.getDate() && d.getMonth()==today.getMonth()) || (d.getDate()==tomorrow.getDate() && d.getMonth()==tomorrow.getMonth())) {
-                    const msgU = `Halo Kak ${u.name}! 👋\n\nKami dari *Seblak Salah* ingin mengucapkan *Selamat Ulang Tahun*! 🎂✨\n\nSemoga panjang umur, sehat selalu, dan dilancarkan rezekinya. Sebagai kado spesial, Seblak Salah mau *MENTRAKTIR* Kakak 1 Porsi SEBLAK LENGKAP gratis! 😍\n\nSyaratnya cukup tunjukkan WA ini dan kartu identitas ke kasir. Ditunggu kedatangannya! 🍲✨`;
+                    const msgU = `Halo Kak ${u.name}! 👋\n\nKami dari *Seblak Salah* ingin mengucapkan *Selamat Ulang Tahun*! 🎂✨\n\nSemoga panjang umur, sehat selalu, dan dilancarkan rezekinya. Sebagai kado spesial, Seblak Salah mau *MENTRAKTIR* Kakak 1 Porsi SEBLAK LENGKAP gratis! 😍\n\nSyaratnya cukup tunjukkan WA ini dan kartu identitas ke kasir. Khusus makan di tempat ya Kak. Ditunggu kedatangannya! 🍲✨`;
                     dash.innerHTML += `<div class="info-row"><span>🎂 ${u.name} (Ultah)</span><button style="border:none;background:var(--w);color:white;border-radius:8px;padding:5px 10px;font-weight:bold;" onclick="window.open('https://wa.me/${u.phone.replace(/^0/,'62')}?text=${encodeURIComponent(msgU)}')">🎁</button></div>`;
                 }
             }
