@@ -89,7 +89,7 @@
 
 <script>
     // URL Deployment terbaru Bapak
-    const SPREADSHEET_URL = "https://script.google.com/macros/s/AKfycbwE6WMd02S86oH9tT7ki5Bz2GXOTVWLFg8jpAipTP6NU6-pYB8DTkzKkK2z2XJJhtf3/exec"; 
+    const SPREADSHEET_URL = "https://script.google.com/macros/s/AKfycbxVHlfTyILvIWKWOZj-lHd5Fv91vKW_6Rh3DPCzIJ_lz1u6RPoM8v9zcqcW_uYLeDIm/exec"; 
     const STORAGE_KEY = 'seblaksalah_crm_v4';
     let lastActiveUser = null;
 
@@ -103,7 +103,7 @@
     }
 
     async function cekDataCloud() {
-        const phone = document.getElementById('phone').value.trim();
+        const phone = document.getElementById('phone').value;
         if (!phone) return;
         const statusEl = document.getElementById('statusCloud');
         statusEl.innerHTML = "⏳ Mengecek data...";
@@ -133,7 +133,7 @@
     }
 
     function tambahPoin() {
-        const phone = document.getElementById('phone').value.trim();
+        const phone = document.getElementById('phone').value;
         const nameInput = document.getElementById('name').value;
         const dobInput = document.getElementById('dob').value;
         const branchInput = document.getElementById('branch').value;
@@ -200,9 +200,9 @@
         const pesan = `${sapaanWaktu}, apa kabarnya Kak ${u.name}? 👋\n\nSemoga Kakak sehat dan bahagia selalu ya. Di *Seblak Salah*, kami tiba-tiba teringat Kakak karena sudah ${diffVisit} hari Kakak tidak mampir ke sini. ✨\n\nOh iya, Kakak masih punya tabungan *${u.points} Poin* loh. 😊\n\nYuk, sempatkan mampir lagi. Kami tunggu ya Kak! 🍲✨`;
         window.open(`https://wa.me/${phone.replace(/^0/, '62')}?text=${encodeURIComponent(pesan)}`, '_blank');
         
-        // Simpan waktu sapaan dan refresh dashboard agar langsung hilang selama 10 hari
         db[phone].lastFollowUp = today.toISOString();
         saveDb(db);
+        refreshDashboards();
     }
 
     function refreshDashboards() {
@@ -215,7 +215,6 @@
 
         for (let phone in db) {
             const u = db[phone];
-            // Logika Ultah
             if (u.dob) {
                 const bday = new Date(u.dob);
                 const isToday = bday.getDate() === today.getDate() && bday.getMonth() === today.getMonth();
@@ -226,14 +225,12 @@
                     listUltah.appendChild(row);
                 }
             }
-            // Logika Follow-up Cerdas
             if (u.lastVisit) {
                 const visitDate = new Date(u.lastVisit);
                 const diffVisit = Math.floor((today - visitDate) / (1000 * 60 * 60 * 24));
                 const lastSapaDate = u.lastFollowUp ? new Date(u.lastFollowUp) : null;
                 const diffSapa = lastSapaDate ? Math.floor((today - lastSapaDate) / (1000 * 60 * 60 * 24)) : 999;
 
-                // Tampilkan hanya jika 10 hari tidak mampir DAN 10 hari belum disapa lagi
                 if (diffVisit >= 10 && diffSapa >= 10) {
                     let badges = "";
                     if (u.points >= 10) badges += `<span class="badge badge-redeem">Redeem Ready</span> `;
@@ -248,7 +245,7 @@
     }
 
     function redeemPoin() {
-        const phone = document.getElementById('phone').value.trim();
+        const phone = document.getElementById('phone').value;
         const cost = parseInt(document.getElementById('reward').value);
         let db = getDb();
         if (!db[phone] || db[phone].points < cost) return alert("Poin tidak cukup!");
