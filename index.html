@@ -26,12 +26,9 @@
         .birthday-row { background: #eef7ff; border-color: #cde4f7; }
         .info-text { font-size: 0.8rem; }
         .info-text strong { display: block; font-size: 0.9rem; color: var(--secondary); }
-        .btn-mini-wa { padding: 8px 14px; background: var(--wa); color: white; border: none; border-radius: 10px; font-weight: bold; font-size: 0.75rem; cursor: pointer; }
+        .btn-mini-wa { padding: 6px 12px; background: var(--wa); color: white; border: none; border-radius: 10px; font-weight: bold; font-size: 0.75rem; cursor: pointer; }
         .result-box { margin-top: 15px; padding: 15px; border-radius: 15px; display: none; font-size: 0.9rem; border-left: 5px solid #27ae60; }
         .status-cloud { font-size: 0.7rem; color: #94a3b8; margin-bottom: 10px; text-align: right; font-weight: bold; min-height: 15px; }
-        .badge { display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 0.65rem; font-weight: 800; text-transform: uppercase; margin-top: 4px; }
-        .badge-redeem { background: #27ae60; color: white; }
-        .badge-miss { background: #e74c3c; color: white; }
         .footer { text-align: center; margin-top: 30px; font-size: 0.7rem; color: #94a3b8; border-top: 1px solid #e2e8f0; padding-top: 15px; }
     </style>
 </head>
@@ -88,8 +85,8 @@
 </div>
 
 <script>
-    // URL BARU ANDA SUDAH TERPASANG DI SINI
-    const SPREADSHEET_URL = "https://script.google.com/macros/s/AKfycbzXQGLz1BNTUQjbYa9BUlnnTinpKjz_39NBBxffzdzcIeuGEE1gV_uvtLKnZF6A1Bs/exec"; 
+    // URL Deployment Bapak yang terakhir (Pastikan ini sesuai)
+    const SPREADSHEET_URL = "https://script.google.com/macros/s/AKfycbzEyVJE7M83b5qYO-h7C282JyeR-thbHNPChKkRx7q_xpjMXHovX6qVDd-FLuSmww6N/exec"; 
     const STORAGE_KEY = 'seblaksalah_crm_v4';
     let lastActiveUser = null;
 
@@ -116,20 +113,14 @@
                 if (data.branch) document.getElementById('branch').value = data.branch;
                 let db = getDb();
                 db[phone] = { 
-                    phone: phone, name: data.name, points: data.points, lastVisit: data.lastVisit, 
+                    name: data.name, points: data.points, lastVisit: data.lastVisit, 
                     dob: data.dob, sisaUang: data.sisaUang || 0, branch: data.branch || "Cabang Pahlawan",
                     lastFollowUp: db[phone] ? db[phone].lastFollowUp : null 
                 };
                 saveDb(db);
                 updateStatusUI(data.points, data.sisaUang);
-            } else { 
-                statusEl.innerHTML = "✨ Pelanggan Baru"; 
-                statusEl.style.color = "#e67e22"; 
-            }
-        } catch (e) { 
-            statusEl.innerHTML = "⚠️ Cloud Offline"; 
-            statusEl.style.color = "#e74c3c";
-        }
+            } else { statusEl.innerHTML = "✨ Pelanggan Baru"; statusEl.style.color = "#e67e22"; }
+        } catch (e) { statusEl.innerHTML = "⚠️ Cloud Offline"; statusEl.style.color = "#e74c3c"; }
     }
 
     function tambahPoin() {
@@ -153,7 +144,7 @@
             if(nameInput) db[phone].name = nameInput; 
             if(dobInput) db[phone].dob = dobInput;
         } else { 
-            db[phone] = { phone: phone, name: nameInput || "Pelanggan", points: poinBaru, lastVisit: now, dob: dobInput || "", sisaUang: sisaBaru, branch: branchInput, lastFollowUp: null }; 
+            db[phone] = { name: nameInput || "Pelanggan", points: poinBaru, lastVisit: now, dob: dobInput || "", sisaUang: sisaBaru, branch: branchInput, lastFollowUp: null }; 
         }
         saveDb(db);
         fetch(SPREADSHEET_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ phone, name: db[phone].name, points: db[phone].points, dob: db[phone].dob, amount, branch: branchInput }) });
@@ -170,8 +161,10 @@
         if (!lastActiveUser) return;
         const pts = lastActiveUser.points;
         const sisa = lastActiveUser.sisaUang;
+        const cabang = lastActiveUser.branch;
         let infoPoin = pts >= 10 ? `\n🔥 *Hore!* Poin Kakak sudah bisa ditukar dengan menu favorit gratis!\n` : `\n`;
-        const pesan = `Halo Kak ${lastActiveUser.name}! 👋\n\nTerima kasih sudah mampir ke *Seblak Salah*. 😊\n\nSaldo Poin: *${pts} Poin*\nTabungan Sisa: *Rp${sisa}*${infoPoin}\n\nDitunggu kedatangannya lagi ya kak!`;
+        const katalog = `*Katalog Penukaran Poin:* \n🍹 10 Pts: Es Teh \n🥟 20 Pts: Dimsum \n🍲 25 Pts: Seblak Lengkap`;
+        const pesan = `Halo Kak ${lastActiveUser.name}! 👋\n\nTerima kasih sudah mampir ke *Seblak Salah (${cabang})*. 😊\n\nSaldo Poin: *${pts} Poin*\nTabungan Sisa: *Rp${sisa}*${infoPoin}${katalog}\n\nDitunggu kedatangannya lagi ya kak!`;
         window.open(`https://wa.me/${lastActiveUser.phone.replace(/^0/, '62')}?text=${encodeURIComponent(pesan)}`, '_blank');
         document.getElementById('btnSapa').style.display = 'none';
     }
@@ -185,23 +178,20 @@
     }
 
     function kirimUltah(phone, nama) {
-        const pesan = `Halo Kak ${nama}! 👋\n\nKami dari *Seblak Salah* ingin mengucapkan *Selamat Ulang Tahun*! 🎂✨\n\nSemoga panjang umur, sehat selalu, dan dilancarkan rezekinya. Sebagai kado spesial, Seblak Salah mau *MENTRAKTIR* Kakak 1 Porsi SEBLAK LENGKAP gratis! 😍\n\nKhusus makan di tempat ya Kak. Ditunggu kedatangannya! 🍲✨`;
+        const pesan = `Halo Kak ${nama}! 👋\n\nKami dari *Seblak Salah* ingin mengucapkan *Selamat Ulang Tahun*! 🎂✨\n\nSemoga panjang umur, sehat selalu, dan dilancarkan rezekinya. Sebagai kado spesial, Seblak Salah mau *MENTRAKTIR* Kakak 1 Porsi SEBLAK LENGKAP gratis! 😍\n\nSyaratnya cukup tunjukkan WA ini dan kartu identitas ke kasir. Khusus makan di tempat ya Kak. Ditunggu kedatangannya! 🍲✨`;
         window.open(`https://wa.me/${phone.replace(/^0/, '62')}?text=${encodeURIComponent(pesan)}`, '_blank');
     }
 
-    function kirimRindu(phone) {
+    // FUNGSI KHUSUS UNTUK MENGHILANGKAN DARI DAFTAR SELAMA 10 HARI
+    function kirimRindu(phone, nama, poin, hari) {
         let db = getDb();
-        const u = db[phone];
-        if (!u) return;
-        const today = new Date();
+        // Catat waktu sapaan sekarang
+        db[phone].lastFollowUp = new Date().toISOString();
+        saveDb(db); // Simpan dan otomatis refresh dashboard (nama akan langsung hilang)
+
         const sapaanWaktu = getSapaanWaktu();
-        const visitDate = new Date(u.lastVisit);
-        const diffVisit = Math.ceil(Math.abs(today - visitDate) / (1000 * 60 * 60 * 24));
-        const pesan = `${sapaanWaktu}, apa kabarnya Kak ${u.name}? 👋\n\nSemoga Kakak sehat dan bahagia selalu ya. Di *Seblak Salah*, kami tiba-tiba teringat Kakak karena sudah ${diffVisit} hari Kakak tidak mampir ke sini. ✨\n\nOh iya, Kakak masih punya tabungan *${u.points} Poin* loh. 😊\n\nYuk, sempatkan mampir lagi. Kami tunggu ya Kak! 🍲✨`;
+        const pesan = `${sapaanWaktu}, apa kabarnya Kak ${nama}? 👋\n\nSemoga Kakak sehat dan bahagia selalu ya. Di *Seblak Salah*, kami tiba-tiba teringat Kakak karena sudah ${hari} hari Kakak tidak mampir ke sini. ✨\n\nOh iya, Kakak masih punya tabungan *${poin} Poin* loh. 😊\n\nYuk, sempatkan mampir lagi. Kami tunggu ya Kak! 🍲✨`;
         window.open(`https://wa.me/${phone.replace(/^0/, '62')}?text=${encodeURIComponent(pesan)}`, '_blank');
-        db[phone].lastFollowUp = today.toISOString();
-        saveDb(db);
-        refreshDashboards();
     }
 
     function refreshDashboards() {
@@ -224,19 +214,19 @@
                     listUltah.appendChild(row);
                 }
             }
-            if (u.lastVisit) {
-                const visitDate = new Date(u.lastVisit);
-                const diffVisit = Math.floor((today - visitDate) / (1000 * 60 * 60 * 24));
-                const lastSapaDate = u.lastFollowUp ? new Date(u.lastFollowUp) : null;
-                const diffSapa = lastSapaDate ? Math.floor((today - lastSapaDate) / (1000 * 60 * 60 * 24)) : 999;
+            
+            const visitDate = u.lastVisit ? new Date(u.lastVisit) : null;
+            if (visitDate) {
+                const diffVisit = Math.ceil(Math.abs(today - visitDate) / (1000 * 60 * 60 * 24));
+                
+                // CEK APAKAH SUDAH 10 HARI SEJAK SAPAAN TERAKHIR
+                const lastSapa = u.lastFollowUp ? new Date(u.lastFollowUp) : null;
+                const diffSapa = lastSapa ? Math.floor((today - lastSapa) / (1000 * 60 * 60 * 24)) : 999;
 
+                // TAMPILKAN HANYA JIKA: Sudah 10 hari tidak mampir DAN 10 hari belum disapa ulang
                 if (diffVisit >= 10 && diffSapa >= 10) {
-                    let badges = "";
-                    if (u.points >= 10) badges += `<span class="badge badge-redeem">Redeem Ready</span> `;
-                    if (diffVisit >= 30) badges += `<span class="badge badge-miss">Hampir Hilang</span>`;
-                    
                     const row = document.createElement('div'); row.className = 'item-row follow-up';
-                    row.innerHTML = `<div class="info-text"><strong>${u.name}</strong>${diffVisit} hari tidak mampir<br>${badges}</div><button class="btn-mini-wa" onclick="kirimRindu('${phone}')">Sapa</button>`;
+                    row.innerHTML = `<div class="info-text"><strong>${u.name}</strong>${diffVisit} hari tidak mampir</div><button class="btn-mini-wa" onclick="kirimRindu('${phone}', '${u.name}', ${u.points}, ${diffVisit})">Sapa</button>`;
                     listFollowUp.appendChild(row);
                 }
             }
