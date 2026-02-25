@@ -88,8 +88,8 @@
 </div>
 
 <script>
-    // URL Deployment terbaru Bapak
-    const SPREADSHEET_URL = "https://script.google.com/macros/s/AKfycbxVHlfTyILvIWKWOZj-lHd5Fv91vKW_6Rh3DPCzIJ_lz1u6RPoM8v9zcqcW_uYLeDIm/exec"; 
+    // URL BARU ANDA SUDAH TERPASANG DI SINI
+    const SPREADSHEET_URL = "https://script.google.com/macros/s/AKfycbzXQGLz1BNTUQjbYa9BUlnnTinpKjz_39NBBxffzdzcIeuGEE1gV_uvtLKnZF6A1Bs/exec"; 
     const STORAGE_KEY = 'seblaksalah_crm_v4';
     let lastActiveUser = null;
 
@@ -199,7 +199,6 @@
         const diffVisit = Math.ceil(Math.abs(today - visitDate) / (1000 * 60 * 60 * 24));
         const pesan = `${sapaanWaktu}, apa kabarnya Kak ${u.name}? 👋\n\nSemoga Kakak sehat dan bahagia selalu ya. Di *Seblak Salah*, kami tiba-tiba teringat Kakak karena sudah ${diffVisit} hari Kakak tidak mampir ke sini. ✨\n\nOh iya, Kakak masih punya tabungan *${u.points} Poin* loh. 😊\n\nYuk, sempatkan mampir lagi. Kami tunggu ya Kak! 🍲✨`;
         window.open(`https://wa.me/${phone.replace(/^0/, '62')}?text=${encodeURIComponent(pesan)}`, '_blank');
-        
         db[phone].lastFollowUp = today.toISOString();
         saveDb(db);
         refreshDashboards();
